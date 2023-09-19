@@ -2,18 +2,18 @@ package com.example.server.member.dto;
 
 import com.example.server.member.Authority;
 import com.example.server.member.Member;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SignResponse {
 
     private Long id;
@@ -22,9 +22,9 @@ public class SignResponse {
 
     private String nickname;
 
-//    private String name;
+    private int resultCode;
 
-//    private String email;
+    private String resultMessage;
 
     private List<Authority> roles = new ArrayList<>();
 

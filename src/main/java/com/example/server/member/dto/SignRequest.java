@@ -15,8 +15,4 @@ public class SignRequest {
 
     private String nickname;
 
-    private String name;
-
-    private String email;
-
 }

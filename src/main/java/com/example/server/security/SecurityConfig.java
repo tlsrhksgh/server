@@ -1,5 +1,6 @@
 package com.example.server.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +20,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 @RequiredArgsConstructor
@@ -27,7 +30,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
-
+    private final ObjectMapper objectMapper;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -57,7 +60,7 @@ public class SecurityConfig {
                 // 조건별로 요청 허용/제한 설정
                 .authorizeRequests()
                 // 회원가입과 로그인은 모두 승인
-                .antMatchers("/register", "/login").permitAll()
+                .antMatchers("/register", "/login", "/**/exists").permitAll()
                 // /admin으로 시작하는 요청은 ADMIN 권한이 있는 유저에게만 허용
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 // /user 로 시작하는 요청은 USER 권한이 있는 유저에게만 허용
@@ -74,8 +77,11 @@ public class SecurityConfig {
                         // 권한 문제가 발생했을 때 이 부분을 호출한다.
                         response.setStatus(403);
                         response.setCharacterEncoding("utf-8");
-                        response.setContentType("text/html; charset=UTF-8");
-                        response.getWriter().write("권한이 없는 사용자입니다.");
+                        response.setContentType("application/json; charset=UTF-8");
+                        Map<String, Object> responseMap = new HashMap<>();
+                        responseMap.put("resultCode", 403);
+                        responseMap.put("resultMessage", "권한이 없는 사용자입니다.");
+                        response.getWriter().write(objectMapper.writeValueAsString(responseMap));
                     }
                 })
                 .authenticationEntryPoint(new AuthenticationEntryPoint() {
@@ -84,8 +90,11 @@ public class SecurityConfig {
                         // 인증문제가 발생했을 때 이 부분을 호출한다.
                         response.setStatus(401);
                         response.setCharacterEncoding("utf-8");
-                        response.setContentType("text/html; charset=UTF-8");
-                        response.getWriter().write("인증되지 않은 사용자입니다.");
+                        response.setContentType("application/json; charset=UTF-8");
+                        Map<String, Object> responseMap = new HashMap<>();
+                        responseMap.put("resultCode", 401);
+                        responseMap.put("resultMessage", "인증되지 않은 사용자입니다.");
+                        response.getWriter().write(objectMapper.writeValueAsString(responseMap));
                     }
                 });
 
