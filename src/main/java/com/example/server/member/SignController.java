@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 public class SignController {
@@ -20,19 +22,23 @@ public class SignController {
     }
 
     @PostMapping(value = "/register")
-    public ResponseEntity<Boolean> signup(@RequestBody SignRequest request) throws Exception {
+    public ResponseEntity<SignResponse> signup(@RequestBody SignRequest request) throws Exception {
         return new ResponseEntity<>(memberService.register(request), HttpStatus.OK);
     }
 
-    @GetMapping("/user/get")
-    public ResponseEntity<SignResponse> getUser(@RequestParam String account) throws Exception {
-        return new ResponseEntity<>( memberService.getMember(account), HttpStatus.OK);
-    }
+//    @GetMapping("/user/get")
+//    public ResponseEntity<SignResponse> getUser(@RequestParam String account) throws Exception {
+//        return new ResponseEntity<>( memberService.getMember(account), HttpStatus.OK);
+//    }
+//
+//    @GetMapping("/admin/get")
+//    public ResponseEntity<SignResponse> getUserForAdmin(@RequestParam String account) throws Exception {
+//        return new ResponseEntity<>( memberService.getMember(account), HttpStatus.OK);
+//    }
 
-    @GetMapping("/admin/get")
-    public ResponseEntity<SignResponse> getUserForAdmin(@RequestParam String account) throws Exception {
-        return new ResponseEntity<>( memberService.getMember(account), HttpStatus.OK);
+    @GetMapping("/{account}/exists")
+    public ResponseEntity<SignResponse> checkAccountDuplicate(@PathVariable String account) {
+        return new ResponseEntity<>(memberService.checkAccountDuplicate(account), HttpStatus.OK);
     }
-
 
 }
