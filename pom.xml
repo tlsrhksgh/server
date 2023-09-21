@@ -110,6 +110,7 @@
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <scope>provided</scope> <!-- 안되어 있는 경우 변경! -->
         </dependency>
+
     </dependencies>
 
     <build>

@@ -4,7 +4,7 @@ import com.example.server.common.CodeConst;
 import com.example.server.member.dto.SignRequest;
 import com.example.server.member.dto.SignResponse;
 import com.example.server.security.JwtProvider;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -45,12 +43,11 @@ public class SignService {
                 .build();
     }
 
-
     // 회원가입
     public SignResponse register(SignRequest request) throws Exception {
-        log.debug("SignService - register : START");
+        log.info("SignService - register : START");
         if (memberRepository.existsByAccount(request.getAccount())) {
-            log.debug("SignService - register : ACCOUNT ALREADY EXISTS");
+            log.info("SignService - register : ACCOUNT ALREADY EXISTS");
             return SignResponse.builder()
                     .resultCode(410)
                     .resultMessage("계정이 존재합니다.")
@@ -65,7 +62,7 @@ public class SignService {
 
             member.setRoles(Collections.singletonList(Authority.builder().name("ROLE_USER").build()));
             memberRepository.save(member);
-            log.debug("SignService - register : SUCCESS");
+            log.info("SignService - register : SUCCESS");
             return SignResponse.builder()
                     .id(member.getMemberId())
                     .account(member.getAccount())
@@ -74,6 +71,7 @@ public class SignService {
                     .build();
 
         } catch (Exception e) {
+            log.error("SignService - register : EXCEPTION");
             System.out.println(e.getMessage());
             throw new Exception("잘못된 요청입니다.");
         }
