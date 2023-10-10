@@ -23,16 +23,6 @@ public class SignController {
         return new ResponseEntity<>(memberService.register(request), HttpStatus.OK);
     }
 
-//    @GetMapping("/user/get")
-//    public ResponseEntity<SignResponse> getUser(@RequestParam String account) throws Exception {
-//        return new ResponseEntity<>( memberService.getMember(account), HttpStatus.OK);
-//    }
-//
-//    @GetMapping("/admin/get")
-//    public ResponseEntity<SignResponse> getUserForAdmin(@RequestParam String account) throws Exception {
-//        return new ResponseEntity<>( memberService.getMember(account), HttpStatus.OK);
-//    }
-
     @GetMapping("/{account}/exists")
     public ResponseEntity<SignResponse> checkAccountDuplicate(@PathVariable String account) {
         return new ResponseEntity<>(memberService.checkAccountDuplicate(account), HttpStatus.OK);

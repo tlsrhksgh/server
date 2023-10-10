@@ -1,11 +1,10 @@
-package com.example.server.friend.dto;
+package com.example.server.common;
 
 import com.example.server.friend.Friend;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.util.List;
-import java.util.Map;
 
 @Getter
 @Setter
@@ -13,13 +12,11 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class FriendResponseDto {
+public class CommonResponse {
 
     private String resultCode;
 
     private String resultMessage;
-
-    private List<Friend> list;
 
     private List<Object> data;
 

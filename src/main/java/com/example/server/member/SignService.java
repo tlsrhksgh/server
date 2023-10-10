@@ -79,16 +79,10 @@ public class SignService {
 
     // 계정 중복 체크
     public SignResponse checkAccountDuplicate(String account) {
+        boolean result = memberRepository.existsByAccount(account);
         return SignResponse.builder()
-                .resultCode(200)
-                .resultMessage(String.valueOf(memberRepository.existsByAccount(account)))
+                .resultCode( (result ? 410 : 200))
+                .resultMessage(String.valueOf(result))
                 .build();
     }
-
-//    public SignResponse getMember(String account) throws Exception {
-//        Member member = memberRepository.findByAccount(account)
-//                .orElseThrow(() -> new Exception("계정을 찾을 수 없습니다."));
-//        return new SignResponse(member);
-//    }
-
 }

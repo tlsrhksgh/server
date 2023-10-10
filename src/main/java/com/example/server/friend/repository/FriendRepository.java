@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Transactional
-public interface FriendRepository extends JpaRepository<Friend, Long>  {
+public interface FriendRepository extends JpaRepository<Friend, Long> {
 
     @Query(value = "SELECT COUNT(1) " +
             "FROM friend f " +
@@ -38,7 +38,7 @@ public interface FriendRepository extends JpaRepository<Friend, Long>  {
     @Modifying
     Integer deleteFriendById(Long id) throws Exception;
 
-    @Query(value = "SELECT m.account, m.nickname " +
+    @Query(value = "SELECT m.member_id as id, m.account, m.nickname " +
             "FROM member m " +
             "WHERE m.account " +
             "IN (SELECT " +

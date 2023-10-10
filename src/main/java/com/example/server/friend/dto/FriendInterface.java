@@ -10,6 +10,7 @@ public interface FriendInterface {
     String getRespondent();
     String getAccepted();
 
+    String getMemberId();
     String getAccount();
     String getNickname();
     String getName();
