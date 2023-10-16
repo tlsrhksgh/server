@@ -110,7 +110,17 @@
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <scope>provided</scope> <!-- 안되어 있는 경우 변경! -->
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
+            <version>5.2.2.RELEASE</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-messaging</artifactId>
+            <version>5.2.2.RELEASE</version>
+        </dependency>
     </dependencies>
 
     <build>

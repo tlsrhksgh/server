@@ -2,7 +2,6 @@ package com.example.server.promise.service;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
-import com.example.server.member.Member;
 import com.example.server.promise.Promise;
 import com.example.server.promise.PromiseMember;
 import com.example.server.promise.dto.PromiseInterface;
@@ -12,15 +11,11 @@ import com.example.server.promise.repository.PromiseRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -139,6 +134,38 @@ public class PromiseService {
             }
         } catch (Exception e) {
             log.error("PromiseService - rejectPromiseRequest : Exception");
+            e.printStackTrace();
+            throw new Exception(e);
+        }
+    }
+
+    // 약속 초대
+    public CommonResponse inviteFriend(HashMap<String, String> request) throws Exception {
+        log.info("PromiseService - inviteFriend : START");
+        try {
+            if (promiseMemberRepository.countByPromiseIdAndAccount(Long.parseLong(request.get("promiseId")), request.get("account")) > 0) {
+                // 이미 요청이 되었거나 멤버임
+                log.info("PromiseService - inviteFriend : FAIL");
+                return CommonResponse.builder()
+                        .resultCode(CodeConst.INVITE_FRIEND_FAIL_CODE)
+                        .resultMessage(CodeConst.INVITE_FRIEND_FAIL_MESSAGE)
+                        .build();
+            }
+            else {
+                Promise promise = promiseRepository.findById(Long.parseLong(request.get("promiseId"))).get();
+                PromiseMember friend = PromiseMember.builder().accepted("N").account(request.get("account")).build();
+                friend.setPromise(promise);
+                promise.getMembers().add(friend);
+                promiseRepository.save(promise);
+                log.info("PromiseService - inviteFriend : SUCCESS");
+                return CommonResponse.builder()
+                        .resultCode(CodeConst.SUCCESS_CODE)
+                        .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                        .build();
+            }
+
+        } catch (Exception e) {
+            log.error("PromiseService - inviteFriend : Exception");
             e.printStackTrace();
             throw new Exception(e);
         }

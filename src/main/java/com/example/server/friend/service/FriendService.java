@@ -26,7 +26,7 @@ public class FriendService {
     private final MemberRepository memberRepository;
 
     // 친구 추가 요청
-    public CommonResponse addRequest(FriendRequestDto request) throws Exception {
+    public CommonResponse addRequest(FriendRequestDto request, Authentication authentication) throws Exception {
         log.info("FriendService - addRequest : START");
         try {
             if (!memberRepository.existsByAccount(request.getRespondent())) {
@@ -36,7 +36,7 @@ public class FriendService {
                         .resultMessage(CodeConst.FRIEND_REQUEST_FAIL_01_MESSAGE)
                         .build();
             }
-            else if (friendRepository.isAlreadyRequested(request.getRequester(), request.getRespondent()) > 0) {
+            else if (friendRepository.isAlreadyRequested(authentication.getName(), request.getRespondent()) > 0) {
                 log.info("FriendService - addRequest : FAIL => REQUEST ALREADY SENT OR RECEIVED");
                 return CommonResponse.builder()
                         .resultCode(CodeConst.FRIEND_REQUEST_FAIL_02_CODE)
@@ -45,7 +45,7 @@ public class FriendService {
             }
             else {
                 Friend friend = new Friend();
-                friend.setRequester(request.getRequester());
+                friend.setRequester(authentication.getName());
                 friend.setRespondent(request.getRespondent());
                 friend.setAccepted("N");
                 friendRepository.save(friend);
@@ -136,8 +136,6 @@ public class FriendService {
     public CommonResponse getFriendList(Authentication authentication) throws Exception {
         log.info("FriendService - getFriendList : START");
         try {
-            System.out.println("NAME ===================");
-            System.out.println(authentication.getName());
             List<FriendInterface> result = friendRepository.selectFriendList(authentication.getName());
             ObjectMapper mapper = new ObjectMapper();
             log.info("FriendService - getFriendList : SUCCESS => " + result.size());

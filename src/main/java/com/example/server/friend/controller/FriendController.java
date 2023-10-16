@@ -17,12 +17,12 @@ public class FriendController {
 
     // 친구 요청 보내기
     @PostMapping(value = "/friend/request")
-    public ResponseEntity<CommonResponse> addRequest(@RequestBody FriendRequestDto request) throws Exception {
-        return new ResponseEntity<>(friendService.addRequest(request), HttpStatus.OK);
+    public ResponseEntity<CommonResponse> addRequest(@RequestBody FriendRequestDto request, Authentication authentication) throws Exception {
+        return new ResponseEntity<>(friendService.addRequest(request, authentication), HttpStatus.OK);
     }
 
     // 친구 요청 목록 조회
-    @GetMapping(value = "/friend/requestList/{account}")
+    @GetMapping(value = "/friend/requestList")
     public ResponseEntity<CommonResponse> selectRequestList(Authentication authentication) throws Exception {
         return new ResponseEntity<>(friendService.selectRequestList(authentication), HttpStatus.OK);
     }

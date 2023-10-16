@@ -46,4 +46,9 @@ public class PromiseController {
     public ResponseEntity<CommonResponse> rejectPromiseRequest(@RequestBody PromiseRequestDto request, Authentication authentication) throws Exception {
         return new ResponseEntity<>(promiseService.rejectPromiseRequest(request, authentication), HttpStatus.OK);
     }
+
+    @PostMapping(value = "promise/inviteFriend")
+    public ResponseEntity<CommonResponse> inviteFriend(@RequestBody HashMap<String, String> request) throws Exception {
+        return new ResponseEntity<>(promiseService.inviteFriend(request), HttpStatus.OK);
+    }
 }

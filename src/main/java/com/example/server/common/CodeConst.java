@@ -28,4 +28,7 @@ public class CodeConst {
     public static final String FRIEND_REQUEST_REJECT_FAIL_CODE = "425";
     public static final String FRIEND_REQUEST_REJECT_FAIL_MESSAGE = "REJECT REQUEST FAIL";
 
+    // 약속 초대 불가능
+    public static final String INVITE_FRIEND_FAIL_CODE = "426";
+    public static final String INVITE_FRIEND_FAIL_MESSAGE = "CANNOT SEND REQUEST";
 }

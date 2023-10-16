@@ -10,6 +10,9 @@ public interface PromiseMemberRepository extends JpaRepository<PromiseMember, Lo
 
     Optional<PromiseMember> findByPromiseIdAndAccount(Long promiseId, String account) throws Exception;
 
+    Long countByPromiseIdAndAccount(Long promiseId, String account) throws Exception;
+
     @Modifying
     Integer deletePromiseMemberByPromiseIdAndAccount(Long promiseId, String account) throws Exception;
+
 }
