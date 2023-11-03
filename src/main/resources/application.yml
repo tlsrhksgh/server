@@ -19,7 +19,7 @@ spring:
       hibernate:
         default_batch_fetch_size: 1000
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
 
 # jwt.secret.key? ?? 256bit ????? ???.
 jwt:

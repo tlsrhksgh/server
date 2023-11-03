@@ -1,23 +1,22 @@
 package com.example.server.chat;
 
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.stereotype.Controller;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-/**
- * 웹소켓 핸들러 - 세션 구분 X
- */
-@Controller
+@Component
+@Slf4j
 public class WebSocketHandler extends TextWebSocketHandler {
 
-    @MessageMapping("/chat")
-    @SendTo("/topic/messages")
-    public OutputMessage greeting(Message message) {
-        String time = new SimpleDateFormat("HH:mm").format(new Date());
-        return new OutputMessage(message.getFrom(), message.getText(), time);
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        String payload = message.getPayload();
+        System.out.println("handleTextMessage");
+        TextMessage greeting = new TextMessage("HELLO TEST");
+        session.sendMessage(greeting);
     }
 }

@@ -14,7 +14,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -67,12 +69,13 @@ public class FriendService {
         log.info("FriendService - selectRequestList : START");
         try {
             List<FriendInterface> requestList = friendRepository.selectRequestList(authentication.getName());
-            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> resultMap = new HashMap<>();
+            resultMap.put("list", requestList);
             log.info("FriendService - selectRequestList : SUCCESS => " + requestList.size());
             return CommonResponse.builder()
                     .resultCode(CodeConst.SUCCESS_CODE)
                     .resultMessage(CodeConst.SUCCESS_MESSAGE)
-                    .data(mapper.convertValue(requestList, List.class))
+                    .data(resultMap)
                     .build();
         } catch (Exception e) {
             log.error("FriendService - selectRequestList : Exception");
@@ -138,11 +141,13 @@ public class FriendService {
         try {
             List<FriendInterface> result = friendRepository.selectFriendList(authentication.getName());
             ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> resultMap = new HashMap<>();
+            resultMap.put("list", result);
             log.info("FriendService - getFriendList : SUCCESS => " + result.size());
             return CommonResponse.builder()
                     .resultCode(CodeConst.SUCCESS_CODE)
                     .resultMessage(CodeConst.SUCCESS_MESSAGE)
-                    .data(mapper.convertValue(result, List.class))
+                    .data(resultMap)
                     .build();
         } catch (Exception e) {
             log.error("FriendService - getFriendList : Exception");

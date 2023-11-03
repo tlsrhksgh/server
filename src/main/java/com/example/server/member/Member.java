@@ -27,10 +27,12 @@ public class Member {
 
     private String nickname;
 
-//    private String name;
-//
-//    @Column(unique = true)
-//    private String email;
+    private Integer level;
+
+    private Integer exp;
+
+    @Lob
+    private String img;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @Builder.Default

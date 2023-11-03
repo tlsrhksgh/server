@@ -1,6 +1,7 @@
 package com.example.server.member;
 
 import com.example.server.common.CodeConst;
+import com.example.server.common.CommonResponse;
 import com.example.server.member.dto.SignRequest;
 import com.example.server.member.dto.SignResponse;
 import com.example.server.security.JwtProvider;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -25,7 +28,7 @@ public class SignService {
     private final JwtProvider jwtProvider;
 
     // 로그인
-    public SignResponse login(SignRequest request) throws Exception {
+    public CommonResponse login(SignRequest request) throws Exception {
 
         Member member = memberRepository.findByAccount(request.getAccount()).orElseThrow(() ->
                 new BadCredentialsException("잘못된 계정정보입니다."));
@@ -33,24 +36,23 @@ public class SignService {
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
             throw new BadCredentialsException("잘못된 계정정보입니다.");
         }
-
-        return SignResponse.builder()
-                .id(member.getMemberId())
-                .account(member.getAccount())
-                .nickname(member.getNickname())
-                .roles(member.getRoles())
-                .token(jwtProvider.createToken(member.getAccount(), member.getRoles()))
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("token", jwtProvider.createToken(member.getAccount(), member.getRoles()));
+        return CommonResponse.builder()
+                .resultCode(CodeConst.SUCCESS_CODE)
+                .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                .data(resultMap)
                 .build();
     }
 
     // 회원가입
-    public SignResponse register(SignRequest request) throws Exception {
+    public CommonResponse register(SignRequest request) throws Exception {
         log.info("SignService - register : START");
         if (memberRepository.existsByAccount(request.getAccount())) {
             log.info("SignService - register : ACCOUNT ALREADY EXISTS");
-            return SignResponse.builder()
-                    .resultCode(410)
-                    .resultMessage("계정이 존재합니다.")
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.DUPLICATED_ACCOUNT_CODE)
+                    .resultMessage(CodeConst.DUPLICATED_ACCOUNT_MESSAGE)
                     .build();
         }
         try {
@@ -58,16 +60,17 @@ public class SignService {
                     .account(request.getAccount())
                     .password(passwordEncoder.encode(request.getPassword()))
                     .nickname(request.getNickname())
+                    .level(1)
+                    .exp(0)
+                    .img(request.getImg())
                     .build();
 
             member.setRoles(Collections.singletonList(Authority.builder().name("ROLE_USER").build()));
             memberRepository.save(member);
             log.info("SignService - register : SUCCESS");
-            return SignResponse.builder()
-                    .id(member.getMemberId())
-                    .account(member.getAccount())
-                    .nickname(member.getNickname())
-                    .roles(member.getRoles())
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.SUCCESS_CODE)
+                    .resultMessage(CodeConst.SUCCESS_MESSAGE)
                     .build();
 
         } catch (Exception e) {
@@ -78,11 +81,11 @@ public class SignService {
     }
 
     // 계정 중복 체크
-    public SignResponse checkAccountDuplicate(String account) {
+    public CommonResponse checkAccountDuplicate(String account) {
         boolean result = memberRepository.existsByAccount(account);
-        return SignResponse.builder()
-                .resultCode( (result ? 410 : 200))
-                .resultMessage(String.valueOf(result))
+        return CommonResponse.builder()
+                .resultCode( (result ? CodeConst.DUPLICATED_ACCOUNT_CODE : CodeConst.SUCCESS_CODE))
+                .resultMessage(result ? CodeConst.DUPLICATED_ACCOUNT_MESSAGE : CodeConst.SUCCESS_MESSAGE)
                 .build();
     }
 }

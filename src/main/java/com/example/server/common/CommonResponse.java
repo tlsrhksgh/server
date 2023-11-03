@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -18,6 +19,6 @@ public class CommonResponse {
 
     private String resultMessage;
 
-    private List<Object> data;
+    private Map<String, Object> data;
 
 }

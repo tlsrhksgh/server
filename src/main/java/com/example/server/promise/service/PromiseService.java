@@ -60,12 +60,13 @@ public class PromiseService {
         log.info("PromiseService - getPromiseList : START");
         try {
             List<PromiseInterface> result = promiseRepository.selectPromiseList(authentication.getName(), startDateTime, endDateTime);
-            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> resultMap = new HashMap<>();
+            resultMap.put("list", result);
             log.info("PromiseService - getPromiseList : SUCCESS");
             return CommonResponse.builder()
                     .resultCode(CodeConst.SUCCESS_CODE)
                     .resultMessage(CodeConst.SUCCESS_MESSAGE)
-                    .data(mapper.convertValue(result, List.class))
+                    .data(resultMap)
                     .build();
         } catch (Exception e) {
             log.error("PromiseService - getPromiseList : Exception");
@@ -79,12 +80,13 @@ public class PromiseService {
         log.info("PromiseService - getPromiseRequestList : START");
         try {
             List<PromiseInterface> result = promiseRepository.selectPromiseRequestList(authentication.getName());
-            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> resultMap = new HashMap<>();
+            resultMap.put("list", result);
             log.info("PromiseService - getPromiseRequestList : SUCCESS");
             return CommonResponse.builder()
                     .resultCode(CodeConst.SUCCESS_CODE)
                     .resultMessage(CodeConst.SUCCESS_MESSAGE)
-                    .data(mapper.convertValue(result, List.class))
+                    .data(resultMap)
                     .build();
         } catch (Exception e) {
             log.error("PromiseService - getPromiseRequestList : Exception");
