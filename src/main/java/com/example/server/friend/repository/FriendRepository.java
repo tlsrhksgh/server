@@ -25,7 +25,7 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
             "WHERE respondent = ?1 " +
             "AND accepted = 'N'"
             , nativeQuery = true)
-    List<FriendInterface> selectRequestList(String account) throws Exception;
+    List<FriendInterface> selectRequestList(String nickname) throws Exception;
 
     @Modifying(clearAutomatically = true)
     @Query(value = "UPDATE friend " +
@@ -38,9 +38,9 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     @Modifying
     Integer deleteFriendById(Long id) throws Exception;
 
-    @Query(value = "SELECT m.member_id as id, m.account, m.nickname " +
+    @Query(value = "SELECT m.member_id as id, m.account, m.nickname, m.img, m.level, m.exp " +
             "FROM member m " +
-            "WHERE m.account " +
+            "WHERE m.nickname " +
             "IN (SELECT " +
             "CASE WHEN f.respondent =?1 THEN f.requester " +
             "ELSE f.respondent END " +
@@ -48,5 +48,5 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
             "WHERE (f.respondent = ?1 or f.requester = ?1) " +
             "AND f.accepted = 'Y')"
             ,nativeQuery = true)
-    List<FriendInterface> selectFriendList(String account) throws Exception;
+    List<FriendInterface> selectFriendList(String nickname) throws Exception;
 }

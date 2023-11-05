@@ -10,6 +10,10 @@ public class CodeConst {
     public static final String DUPLICATED_ACCOUNT_CODE = "410";
     public static final String DUPLICATED_ACCOUNT_MESSAGE = "DUPLICATED ACCOUNT";
 
+    // 닉네임 중복
+    public static final String DUPLICATED_NICKNAME_CODE = "411";
+    public static final String DUPLICATED_NICKNAME_MESSAGE = "DUPLICATED NICKNAME";
+
     // 로그인 실패 - 아이디 없음
     public static final String LOGIN_FAIL_ID_CODE = "420";
     public static final String LOGIN_FAIL_ID_MESSAGE = "LOGIN FAIL : ID DOES NOT EXIST";
@@ -20,7 +24,7 @@ public class CodeConst {
 
     // 친구 추가 실패
     public static final String FRIEND_REQUEST_FAIL_01_CODE = "422";
-    public static final String FRIEND_REQUEST_FAIL_01_MESSAGE = "FRIEND REQUEST FAIL : NO SUCH ACCOUNT";
+    public static final String FRIEND_REQUEST_FAIL_01_MESSAGE = "FRIEND REQUEST FAIL : NO SUCH NICKNAME";
     public static final String FRIEND_REQUEST_FAIL_02_CODE = "423";
     public static final String FRIEND_REQUEST_FAIL_02_MESSAGE = "FRIEND REQUEST FAIL : REQUEST ALREADY SENT OR RECEIVED";
 

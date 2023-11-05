@@ -6,11 +6,13 @@ import com.example.server.friend.Friend;
 import com.example.server.friend.dto.FriendInterface;
 import com.example.server.friend.dto.FriendRequestDto;
 import com.example.server.friend.repository.FriendRepository;
+import com.example.server.member.Member;
 import com.example.server.member.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,15 +32,17 @@ public class FriendService {
     // 친구 추가 요청
     public CommonResponse addRequest(FriendRequestDto request, Authentication authentication) throws Exception {
         log.info("FriendService - addRequest : START");
+        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+
         try {
-            if (!memberRepository.existsByAccount(request.getRespondent())) {
+            if (!memberRepository.existsByNickname(request.getRespondent())) {
                 log.info("FriendService - addRequest : FAIL => NO SUCH RESPONDENT");
                 return CommonResponse.builder()
                         .resultCode(CodeConst.FRIEND_REQUEST_FAIL_01_CODE)
                         .resultMessage(CodeConst.FRIEND_REQUEST_FAIL_01_MESSAGE)
                         .build();
             }
-            else if (friendRepository.isAlreadyRequested(authentication.getName(), request.getRespondent()) > 0) {
+            else if (friendRepository.isAlreadyRequested(currentUser.getNickname(), request.getRespondent()) > 0) {
                 log.info("FriendService - addRequest : FAIL => REQUEST ALREADY SENT OR RECEIVED");
                 return CommonResponse.builder()
                         .resultCode(CodeConst.FRIEND_REQUEST_FAIL_02_CODE)
@@ -47,7 +51,7 @@ public class FriendService {
             }
             else {
                 Friend friend = new Friend();
-                friend.setRequester(authentication.getName());
+                friend.setRequester(currentUser.getNickname());
                 friend.setRespondent(request.getRespondent());
                 friend.setAccepted("N");
                 friendRepository.save(friend);
@@ -67,8 +71,9 @@ public class FriendService {
     // 친구 추가 요청 목록 조회
     public CommonResponse selectRequestList(Authentication authentication) throws Exception {
         log.info("FriendService - selectRequestList : START");
+        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
         try {
-            List<FriendInterface> requestList = friendRepository.selectRequestList(authentication.getName());
+            List<FriendInterface> requestList = friendRepository.selectRequestList(currentUser.getNickname());
             Map<String, Object> resultMap = new HashMap<>();
             resultMap.put("list", requestList);
             log.info("FriendService - selectRequestList : SUCCESS => " + requestList.size());
@@ -138,8 +143,9 @@ public class FriendService {
     // 친구 목록 조회
     public CommonResponse getFriendList(Authentication authentication) throws Exception {
         log.info("FriendService - getFriendList : START");
+        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
         try {
-            List<FriendInterface> result = friendRepository.selectFriendList(authentication.getName());
+            List<FriendInterface> result = friendRepository.selectFriendList(currentUser.getNickname());
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> resultMap = new HashMap<>();
             resultMap.put("list", result);

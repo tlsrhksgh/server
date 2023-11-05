@@ -14,4 +14,10 @@ public interface FriendInterface {
     String getAccount();
     String getNickname();
     String getName();
+
+    String getExp();
+
+    String getLevel();
+
+    String getImg();
 }

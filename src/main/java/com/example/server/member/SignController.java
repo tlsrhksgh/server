@@ -23,9 +23,13 @@ public class SignController {
         return new ResponseEntity<>(memberService.register(request), HttpStatus.OK);
     }
 
-    @GetMapping("/{account}/exists")
+    @GetMapping("/{account}/exists/account")
     public ResponseEntity<CommonResponse> checkAccountDuplicate(@PathVariable String account) {
         return new ResponseEntity<>(memberService.checkAccountDuplicate(account), HttpStatus.OK);
     }
 
+    @GetMapping("/{nickname}/exists/nickname")
+    public ResponseEntity<CommonResponse> checkNickNameDuplicate(@PathVariable String nickname) {
+        return new ResponseEntity<>(memberService.checkNickNameDuplicate(nickname), HttpStatus.OK);
+    }
 }

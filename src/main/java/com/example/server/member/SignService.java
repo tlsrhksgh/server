@@ -83,9 +83,24 @@ public class SignService {
     // 계정 중복 체크
     public CommonResponse checkAccountDuplicate(String account) {
         boolean result = memberRepository.existsByAccount(account);
+        Map<String ,Object> resultMap = new HashMap<>();
+        resultMap.put("isDuplicated", result);
         return CommonResponse.builder()
-                .resultCode( (result ? CodeConst.DUPLICATED_ACCOUNT_CODE : CodeConst.SUCCESS_CODE))
-                .resultMessage(result ? CodeConst.DUPLICATED_ACCOUNT_MESSAGE : CodeConst.SUCCESS_MESSAGE)
+                .resultCode(CodeConst.SUCCESS_CODE)
+                .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                .data(resultMap)
+                .build();
+    }
+
+    // 닉네임 중복 체크
+    public CommonResponse checkNickNameDuplicate(String nickname) {
+        boolean result = memberRepository.existsByNickname(nickname);
+        Map<String ,Object> resultMap = new HashMap<>();
+        resultMap.put("isDuplicated", result);
+        return CommonResponse.builder()
+                .resultCode(CodeConst.SUCCESS_CODE)
+                .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                .data(resultMap)
                 .build();
     }
 }
