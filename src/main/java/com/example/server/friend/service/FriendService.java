@@ -80,13 +80,15 @@ public class FriendService {
             for (FriendInterface friendInterface : requestList) {
                 Map<String, Object> info = new HashMap<>();
                 info.put("requestInfo", friendInterface);
-                Member member = memberRepository.findMemberByAccount(friendInterface.getRequester());
+                Member member = memberRepository.findMemberByNickname(friendInterface.getRequester());
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> memberInfo = mapper.convertValue(member, Map.class);
-                memberInfo.remove("password");
-                memberInfo.remove("roles");
-                memberInfo.remove("id");
-                info.put("memberInfo", memberInfo);
+                if (!memberInfo.isEmpty()) {
+                    memberInfo.remove("password");
+                    memberInfo.remove("roles");
+                    memberInfo.remove("id");
+                    info.put("memberInfo", memberInfo);
+                }
                 resultList.add(info);
             }
             if (resultList.isEmpty()) {
