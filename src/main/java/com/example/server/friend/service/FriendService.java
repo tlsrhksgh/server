@@ -88,8 +88,8 @@ public class FriendService {
                     memberInfo.remove("roles");
                     memberInfo.remove("id");
                     info.put("memberInfo", memberInfo);
+                    resultList.add(info);
                 }
-                resultList.add(info);
             }
             if (resultList.isEmpty()) {
                 resultMap.put("info", "FRIEND REQUEST DOES NOT EXIST");
