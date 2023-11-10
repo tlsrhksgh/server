@@ -2,6 +2,8 @@ package com.example.server.promise.service;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
+import com.example.server.member.Member;
+import com.example.server.member.MemberRepository;
 import com.example.server.promise.Promise;
 import com.example.server.promise.PromiseMember;
 import com.example.server.promise.dto.PromiseInterface;
@@ -12,7 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,27 +27,34 @@ public class PromiseService {
 
     private final PromiseRepository promiseRepository;
     private final PromiseMemberRepository promiseMemberRepository;
+    private final MemberRepository memberRepository;
 
     // 약속 생성
-    public CommonResponse createPromise(HashMap<String, Object> request) throws Exception {
+    public CommonResponse createPromise(HashMap<String, Object> request, Authentication authentication) throws Exception {
         log.info("PromiseService - createPromise : START");
-        String currentAccount = SecurityContextHolder.getContext().getAuthentication().getName();
+        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
         try {
             ObjectMapper mapper = new ObjectMapper();
             Promise promise = mapper.convertValue(request.get("info"), Promise.class);
-            promise.setOrganizer(currentAccount);
+            promise.setOrganizer(currentUser.getNickname());
             List<Map<String, String>> members = mapper.convertValue(request.get("members"), List.class);
             List<PromiseMember> promiseMembers = new ArrayList<>();
-            promiseMembers.add(PromiseMember.builder().account(currentAccount).accepted("Y").build());
-            for (Map<String, String> member : members) {
-                promiseMembers.add(PromiseMember.builder().account(member.get("account")).accepted("N").build());
+            promiseMembers.add(PromiseMember.builder().nickname(currentUser.getNickname()).accepted("Y").build());
+            if (!members.isEmpty()) {
+                for (Map<String, String> member : members) {
+                    promiseMembers.add(PromiseMember.builder().nickname(member.get("nickname")).accepted("N").build());
+                }
             }
             promise.setMembers(promiseMembers);
-            promiseRepository.save(promise);
+
+            Map<String, Object> resultMap = new HashMap<>();
+            Promise promiseInfo = promiseRepository.save(promise);
+            resultMap.put("info", promiseInfo);
             log.info("PromiseService - createPromise : SUCCESS");
             return CommonResponse.builder()
                     .resultCode(CodeConst.SUCCESS_CODE)
                     .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                    .data(resultMap)
                     .build();
         } catch (Exception e) {
             log.error("PromiseService - createPromise : Exception");
@@ -58,8 +66,9 @@ public class PromiseService {
     // 약속 목록 조회
     public CommonResponse getPromiseList(String startDateTime, String endDateTime, Authentication authentication) throws Exception {
         log.info("PromiseService - getPromiseList : START");
+        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
         try {
-            List<PromiseInterface> result = promiseRepository.selectPromiseList(authentication.getName(), startDateTime, endDateTime);
+            List<PromiseInterface> result = promiseRepository.selectPromiseList(currentUser.getNickname(), startDateTime, endDateTime);
             Map<String, Object> resultMap = new HashMap<>();
             resultMap.put("list", result);
             log.info("PromiseService - getPromiseList : SUCCESS");
@@ -78,8 +87,9 @@ public class PromiseService {
     // 약속 초대 요청 목록 조회
     public CommonResponse getPromiseRequestList(Authentication authentication) throws Exception {
         log.info("PromiseService - getPromiseRequestList : START");
+        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
         try {
-            List<PromiseInterface> result = promiseRepository.selectPromiseRequestList(authentication.getName());
+            List<PromiseInterface> result = promiseRepository.selectPromiseRequestList(currentUser.getNickname());
             Map<String, Object> resultMap = new HashMap<>();
             resultMap.put("list", result);
             log.info("PromiseService - getPromiseRequestList : SUCCESS");
@@ -95,20 +105,26 @@ public class PromiseService {
         }
     }
 
+    @Transactional
     // 약속 초대 요청 수락
     public CommonResponse acceptPromiseRequest(PromiseRequestDto request, Authentication authentication) throws Exception {
         log.info("PromiseService - acceptPromiseRequest : START");
+        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
         try {
-            PromiseMember promiseMember = promiseMemberRepository.findByPromiseIdAndAccount(Long.parseLong(request.getId()),authentication.getName()).orElseThrow(() ->
-                    new Exception("서버 오류입니다."));
-            promiseMember.setAccepted("Y");
-            promiseMemberRepository.save(promiseMember);
-
-            log.info("PromiseService - acceptPromiseRequest : SUCCESS");
-            return CommonResponse.builder()
-                    .resultCode(CodeConst.SUCCESS_CODE)
-                    .resultMessage(CodeConst.SUCCESS_MESSAGE)
-                    .build();
+            if (promiseMemberRepository.updateAcceptedY(request.getId(), currentUser.getNickname()) == 1) {
+                log.info("PromiseService - acceptPromiseRequest : SUCCESS");
+                return CommonResponse.builder()
+                        .resultCode(CodeConst.SUCCESS_CODE)
+                        .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                        .build();
+            }
+            else {
+                log.info("PromiseService - acceptPromiseRequest : FAIL");
+                return CommonResponse.builder()
+                        .resultCode(CodeConst.FRIEND_REQUEST_ACCEPT_FAIL_CODE)
+                        .resultMessage(CodeConst.FRIEND_REQUEST_ACCEPT_FAIL_MESSAGE)
+                        .build();
+            }
         } catch (Exception e) {
             log.error("PromiseService - acceptPromiseRequest : Exception");
             e.printStackTrace();
@@ -119,8 +135,9 @@ public class PromiseService {
     // 약속 초대 요청 거절
     public CommonResponse rejectPromiseRequest(PromiseRequestDto request, Authentication authentication) throws Exception {
         log.info("PromiseService - rejectPromiseRequest : START");
+        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
         try {
-            if (promiseMemberRepository.deletePromiseMemberByPromiseIdAndAccount(Long.parseLong(request.getId()), authentication.getName()) == 1) {
+            if (promiseMemberRepository.deletePromiseMemberByPromiseIdAndNickname(Long.parseLong(request.getId()), currentUser.getNickname()) == 1) {
                 log.info("PromiseService - rejectPromiseRequest : SUCCESS");
                 return CommonResponse.builder()
                         .resultCode(CodeConst.SUCCESS_CODE)
@@ -145,7 +162,7 @@ public class PromiseService {
     public CommonResponse inviteFriend(HashMap<String, String> request) throws Exception {
         log.info("PromiseService - inviteFriend : START");
         try {
-            if (promiseMemberRepository.countByPromiseIdAndAccount(Long.parseLong(request.get("promiseId")), request.get("account")) > 0) {
+            if (promiseMemberRepository.countByPromiseIdAndNickname(Long.parseLong(request.get("promiseId")), request.get("nickname")) > 0) {
                 // 이미 요청이 되었거나 멤버임
                 log.info("PromiseService - inviteFriend : FAIL");
                 return CommonResponse.builder()
@@ -155,7 +172,7 @@ public class PromiseService {
             }
             else {
                 Promise promise = promiseRepository.findById(Long.parseLong(request.get("promiseId"))).get();
-                PromiseMember friend = PromiseMember.builder().accepted("N").account(request.get("account")).build();
+                PromiseMember friend = PromiseMember.builder().accepted("N").nickname(request.get("nickname")).build();
                 friend.setPromise(promise);
                 promise.getMembers().add(friend);
                 promiseRepository.save(promise);

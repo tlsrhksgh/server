@@ -3,9 +3,9 @@ package com.example.server.member;
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
 import com.example.server.member.dto.SignRequest;
-import com.example.server.member.dto.SignResponse;
 import com.example.server.security.JwtProvider;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -36,7 +36,11 @@ public class SignService {
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
             throw new BadCredentialsException("잘못된 계정정보입니다.");
         }
+        ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> resultMap = new HashMap<>();
+        Map<String, Object> userInfo = mapper.convertValue(member, Map.class);
+        userInfo.remove("password");
+        resultMap.put("userInfo", userInfo);
         resultMap.put("token", jwtProvider.createToken(member.getAccount(), member.getRoles()));
         return CommonResponse.builder()
                 .resultCode(CodeConst.SUCCESS_CODE)
@@ -53,6 +57,13 @@ public class SignService {
             return CommonResponse.builder()
                     .resultCode(CodeConst.DUPLICATED_ACCOUNT_CODE)
                     .resultMessage(CodeConst.DUPLICATED_ACCOUNT_MESSAGE)
+                    .build();
+        }
+        if (memberRepository.existsByNickname(request.getNickname())) {
+            log.info("SignService - register : NICKNAME ALREADY EXISTS");
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.DUPLICATED_NICKNAME_CODE)
+                    .resultMessage(CodeConst.DUPLICATED_NICKNAME_MESSAGE)
                     .build();
         }
         try {

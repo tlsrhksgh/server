@@ -7,7 +7,6 @@ spring:
     password: qwer1234
     url: jdbc:mysql://server-database.c2sms6rorlmj.ap-northeast-2.rds.amazonaws.com:3306/toydb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
 
-
   mvc:
     view:
       prefix: /WEB-INF/views/
@@ -21,6 +20,8 @@ spring:
         default_batch_fetch_size: 1000
     hibernate:
       ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   profiles:
     active: db
 
@@ -28,4 +29,3 @@ spring:
 jwt:
   secret:
     key: x!A%D*G-KaPdSgVkYp3s5v8y/B?E(H+M
-
