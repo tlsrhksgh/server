@@ -1,4 +1,4 @@
-package com.example.server.chat;
+package com.example.server.chat.domain;
 
 import lombok.*;
 

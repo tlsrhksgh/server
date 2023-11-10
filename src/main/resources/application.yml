@@ -22,6 +22,8 @@ spring:
       ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  profiles:
+    active: db
 
 # jwt.secret.key? ?? 256bit ????? ???.
 jwt:
