@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,25 @@ public class FriendService {
         try {
             List<FriendInterface> requestList = friendRepository.selectRequestList(currentUser.getNickname());
             Map<String, Object> resultMap = new HashMap<>();
-            resultMap.put("list", requestList);
+            List<Map<String, Object>> resultList = new ArrayList<>();
+            for (FriendInterface friendInterface : requestList) {
+                Map<String, Object> info = new HashMap<>();
+                info.put("requestInfo", friendInterface);
+                Member member = memberRepository.findMemberByAccount(friendInterface.getRequester());
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, Object> memberInfo = mapper.convertValue(member, Map.class);
+                memberInfo.remove("password");
+                memberInfo.remove("roles");
+                memberInfo.remove("id");
+                info.put("memberInfo", memberInfo);
+                resultList.add(info);
+            }
+            if (resultList.isEmpty()) {
+                resultMap.put("info", "FRIEND REQUEST DOES NOT EXIST");
+            }
+            else {
+                resultMap.put("info", resultList);
+            }
             log.info("FriendService - selectRequestList : SUCCESS => " + requestList.size());
             return CommonResponse.builder()
                     .resultCode(CodeConst.SUCCESS_CODE)
@@ -90,10 +109,11 @@ public class FriendService {
     }
 
     // 친구 추가 요청 수락
-    public CommonResponse acceptRequest(FriendRequestDto request) throws Exception {
+    public CommonResponse acceptRequest(FriendRequestDto request, Authentication authentication) throws Exception {
         log.info("FriendService - acceptRequest : START");
+        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
         try {
-            if (friendRepository.updateAcceptedY(request.getRequestId()) == 1) {
+            if (friendRepository.updateAcceptedY(request.getRequestId(), currentUser.getNickname()) == 1) {
                 log.info("FriendService - acceptRequest : SUCCESS");
                 return CommonResponse.builder()
                         .resultCode(CodeConst.SUCCESS_CODE)
@@ -107,7 +127,6 @@ public class FriendService {
                         .resultMessage(CodeConst.FRIEND_REQUEST_ACCEPT_FAIL_MESSAGE)
                         .build();
             }
-
         } catch (Exception e) {
             log.error("FriendService - acceptRequest : Exception");
             e.printStackTrace();
@@ -116,10 +135,11 @@ public class FriendService {
     }
 
     // 친구 추가 요청 거절
-    public CommonResponse rejectRequest(FriendRequestDto request) throws Exception {
+    public CommonResponse rejectRequest(FriendRequestDto request, Authentication authentication) throws Exception {
         log.info("FriendService - rejectRequest : START");
+        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
         try {
-            if (friendRepository.deleteFriendById(Long.parseLong(request.getRequestId())) == 1) {
+            if (friendRepository.deleteFriendByIdAndRespondent(Long.parseLong(request.getRequestId()), currentUser.getNickname()) == 1) {
                 log.info("FriendService - rejectRequest : SUCCESS");
                 return CommonResponse.builder()
                         .resultCode(CodeConst.SUCCESS_CODE)

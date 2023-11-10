@@ -29,14 +29,14 @@ public class FriendController {
 
     // 친구 요청 수락
     @PostMapping(value = "/friend/acceptRequest")
-    public ResponseEntity<CommonResponse> acceptRequest(@RequestBody FriendRequestDto request) throws Exception {
-        return new ResponseEntity<>(friendService.acceptRequest(request), HttpStatus.OK);
+    public ResponseEntity<CommonResponse> acceptRequest(@RequestBody FriendRequestDto request, Authentication authentication) throws Exception {
+        return new ResponseEntity<>(friendService.acceptRequest(request, authentication), HttpStatus.OK);
     }
 
     // 친구 요청 거절
     @PostMapping(value = "/friend/rejectRequest")
-    public ResponseEntity<CommonResponse> rejectRequest(@RequestBody FriendRequestDto request) throws Exception {
-        return new ResponseEntity<>(friendService.rejectRequest(request), HttpStatus.OK);
+    public ResponseEntity<CommonResponse> rejectRequest(@RequestBody FriendRequestDto request, Authentication authentication) throws Exception {
+        return new ResponseEntity<>(friendService.rejectRequest(request, authentication), HttpStatus.OK);
     }
 
     // 친구 목록 조회

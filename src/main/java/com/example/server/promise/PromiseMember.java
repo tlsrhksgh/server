@@ -1,5 +1,6 @@
 package com.example.server.promise;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
@@ -18,11 +19,12 @@ public class PromiseMember {
     @JsonIgnore
     private Long id;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "promise_id")
     private Promise promise;
 
-    private String account;
+    private String nickname;
 
     private String accepted;
 

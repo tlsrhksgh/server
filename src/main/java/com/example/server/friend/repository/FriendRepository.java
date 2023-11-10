@@ -13,7 +13,7 @@ import java.util.List;
 public interface FriendRepository extends JpaRepository<Friend, Long> {
 
     @Query(value = "SELECT COUNT(1) " +
-            "FROM friend f " +
+            "FROM Friend f " +
             "WHERE (f.requester = ?1 and f.respondent = ?2) " +
             "OR (f.requester = ?2 AND f.respondent = ?1) " +
             "LIMIT 1"
@@ -21,30 +21,32 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     Integer isAlreadyRequested(String requester, String respondent) throws Exception;
 
     @Query(value = "SELECT id, requester, respondent, accepted " +
-            "FROM friend " +
+            "FROM Friend " +
             "WHERE respondent = ?1 " +
             "AND accepted = 'N'"
             , nativeQuery = true)
     List<FriendInterface> selectRequestList(String nickname) throws Exception;
 
     @Modifying(clearAutomatically = true)
-    @Query(value = "UPDATE friend " +
+    @Query(value = "UPDATE Friend " +
             "SET accepted = 'Y' " +
             "WHERE id = ?1 " +
+            "AND respondent = ?2 " +
             "AND accepted = 'N'"
             , nativeQuery = true)
-    Integer updateAcceptedY(String requestId) throws Exception;
+    Integer updateAcceptedY(String requestId, String nickname
+    ) throws Exception;
 
     @Modifying
-    Integer deleteFriendById(Long id) throws Exception;
+    Integer deleteFriendByIdAndRespondent(Long id, String nickname) throws Exception;
 
-    @Query(value = "SELECT m.member_id as id, m.account, m.nickname, m.img, m.level, m.exp " +
-            "FROM member m " +
+    @Query(value = "SELECT m.account, m.nickname, m.img, m.level, m.exp " +
+            "FROM Member m " +
             "WHERE m.nickname " +
             "IN (SELECT " +
             "CASE WHEN f.respondent =?1 THEN f.requester " +
             "ELSE f.respondent END " +
-            "FROM friend f " +
+            "FROM Friend f " +
             "WHERE (f.respondent = ?1 or f.requester = ?1) " +
             "AND f.accepted = 'Y')"
             ,nativeQuery = true)

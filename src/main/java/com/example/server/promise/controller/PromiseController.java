@@ -19,8 +19,8 @@ public class PromiseController {
 
     // 약속 생성
     @PostMapping(value = "/promise/create")
-    public ResponseEntity<CommonResponse> createPromise(@RequestBody HashMap<String, Object> request) throws Exception {
-        return new ResponseEntity<>(promiseService.createPromise(request), HttpStatus.OK);
+    public ResponseEntity<CommonResponse> createPromise(@RequestBody HashMap<String, Object> request, Authentication authentication) throws Exception {
+        return new ResponseEntity<>(promiseService.createPromise(request, authentication), HttpStatus.OK);
     }
 
     // 약속 목록 조회
