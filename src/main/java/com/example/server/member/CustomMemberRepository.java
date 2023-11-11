@@ -1,6 +1,6 @@
 package com.example.server.member;
 
-import com.example.server.chat.dto.CreateRoomForm;
+import com.example.server.chat.service.dto.CreateRoomForm;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;

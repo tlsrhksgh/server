@@ -1,15 +1,17 @@
 package com.example.server.chat.domain.model.entity;
 
+import com.example.server.chat.domain.model.BaseTimeEntity;
+
 import javax.persistence.*;
 
 @Entity
-public class ChatMessage {
+public class ChatMessage extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nickname;
+    private String author;
     private String message;
 
     @ManyToOne
