@@ -35,6 +35,11 @@ public interface PromiseMemberRepository extends JpaRepository<PromiseMember, Lo
     @Modifying
     Integer deletePromiseMembersByPromiseId(Long promiseId) throws Exception;
 
-    PromiseMember findPromiseMemberByNicknameAndPromiseId(String nickname, Long promiseId) throws Exception;
-
+    @Modifying(clearAutomatically = true)
+    @Query(value = "UPDATE PromiseMember " +
+            "SET isSucceed = ?3 " +
+            "WHERE promise_id = ?1 " +
+            "AND nickname = ?2 "
+            , nativeQuery = true)
+    Integer updateIsSucceed(String requestId, String nickname, String isSucceed) throws Exception;
 }

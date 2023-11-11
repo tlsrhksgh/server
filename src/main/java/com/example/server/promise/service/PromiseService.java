@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.apache.bcel.classfile.Code;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -312,6 +313,52 @@ public class PromiseService {
 
         } catch (Exception e) {
             log.error("PromiseService - inviteFriend : Exception");
+            e.printStackTrace();
+            throw new Exception(e);
+        }
+    }
+
+    // 약속 수정 -- 방장만 하도록 추후 수정
+    public CommonResponse editPromise(Map<String, String> request, Authentication authentication) throws Exception {
+        log.info("PromiseService - editPromise : START");
+        try {
+            String promiseId = request.get("promiseId");
+            String title = request.get("title");
+            String date = request.get("date");
+            String memo = request.get("memo");
+            String penalty = request.get("penalty");
+            String location = request.get("location");
+            promiseRepository.updateInfo(promiseId, title, date, memo, penalty, location);
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.SUCCESS_CODE)
+                    .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                    .build();
+        } catch (Exception e) {
+            log.error("PromiseService - editPromise : Exception");
+            e.printStackTrace();
+            throw new Exception(e);
+        }
+    }
+
+    // 약속 결과 처리 -- 방장만 하도록 추후 수정
+    public CommonResponse result(Map<String, Object> request, Authentication authentication) throws Exception {
+        log.info("PromiseService - result : START");
+        try {
+
+            String requestId = String.valueOf(request.get("promiseId"));
+            ObjectMapper mapper = new ObjectMapper();
+            List<Map<String, String>> result = mapper.convertValue(request.get("result"), List.class);
+            for (Map<String, String> map : result) {
+                promiseMemberRepository.updateIsSucceed(requestId, map.get("nickname"), map.get("isSucceed"));
+            }
+            promiseRepository.updateCompleted(requestId);
+
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.SUCCESS_CODE)
+                    .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                    .build();
+        } catch (Exception e) {
+            log.error("PromiseService - result : Exception");
             e.printStackTrace();
             throw new Exception(e);
         }

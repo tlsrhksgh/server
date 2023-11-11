@@ -34,4 +34,22 @@ public interface PromiseRepository extends JpaRepository<Promise, Long> {
             "WHERE id = ?1 "
             , nativeQuery = true)
     Integer updateLeader(String promiseId, String newLeader) throws Exception;
+
+    @Modifying(clearAutomatically = true)
+    @Query(value = "UPDATE Promise " +
+            "SET title = ?2 " +
+            ", date = ?3 " +
+            ", memo = ?4 " +
+            ", penalty = ?5 " +
+            ", location = ?6 " +
+            "WHERE id = ?1 "
+            , nativeQuery = true)
+    Integer updateInfo(String promiseId, String title, String date, String memo, String penalty, String location) throws Exception;
+
+    @Modifying(clearAutomatically = true)
+    @Query(value = "UPDATE Promise " +
+            "SET completed = 'Y' " +
+            "WHERE id = ?1 "
+            , nativeQuery = true)
+    Integer updateCompleted(String promiseId) throws Exception;
 }

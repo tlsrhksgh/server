@@ -70,4 +70,14 @@ public class PromiseController {
     public ResponseEntity<CommonResponse> inviteFriend(@RequestBody HashMap<String, String> request) throws Exception {
         return new ResponseEntity<>(promiseService.inviteFriend(request), HttpStatus.OK);
     }
+
+    @PostMapping(value = "promise/editPromise")
+    public ResponseEntity<CommonResponse> editPromise(@RequestBody Map<String, String> request, Authentication authentication) throws Exception {
+        return new ResponseEntity<>(promiseService.editPromise(request, authentication), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "promise/result")
+    public ResponseEntity<CommonResponse> result(@RequestBody Map<String, Object> request, Authentication authentication) throws Exception {
+        return new ResponseEntity<>(promiseService.result(request, authentication), HttpStatus.OK);
+    }
 }
