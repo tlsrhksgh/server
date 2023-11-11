@@ -1,14 +1,17 @@
 package com.example.server.chat.service;
 
+import com.example.server.chat.domain.repository.dto.ChatRoomListResponse;
 import com.example.server.chat.domain.model.entity.ChatRoom;
 import com.example.server.chat.domain.model.entity.MemberChatRoom;
 import com.example.server.chat.domain.repository.ChatRoomRepository;
 import com.example.server.chat.domain.repository.MemberChatRoomRepository;
-import com.example.server.chat.dto.CreateRoomForm;
+import com.example.server.chat.domain.repository.custom.CustomMemberChatRoomRepository;
+import com.example.server.chat.service.dto.CreateRoomForm;
 import com.example.server.member.CustomMemberRepository;
 import com.example.server.member.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +22,9 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final MemberChatRoomRepository memberChatRoomRepository;
     private final CustomMemberRepository customMemberRepository;
+    private final CustomMemberChatRoomRepository customMemberChatRoomRepository;
 
+    @Transactional
     public Long createRoom(CreateRoomForm form) {
         ChatRoom room = new ChatRoom();
 
@@ -39,5 +44,9 @@ public class ChatRoomService {
         memberChatRoomRepository.saveAll(memberChatRooms);
 
         return room.getId();
+    }
+
+    public List<ChatRoomListResponse> findAllChatRoom(String account) {
+        return customMemberChatRoomRepository.findAllChatRoom(account);
     }
 }
