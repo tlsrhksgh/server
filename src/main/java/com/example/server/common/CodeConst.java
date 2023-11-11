@@ -14,6 +14,10 @@ public class CodeConst {
     public static final String DUPLICATED_NICKNAME_CODE = "411";
     public static final String DUPLICATED_NICKNAME_MESSAGE = "DUPLICATED NICKNAME";
 
+    // 이미지 변경 실패
+    public static final String IMAGE_CHANGE_FAIL_CODE = "412";
+    public static final String IMAGE_CHANGE_FAIL_MESSAGE = "CHANGING IMAGE REQUEST FAILED";
+
     // 로그인 실패 - 아이디 없음
     public static final String LOGIN_FAIL_ID_CODE = "420";
     public static final String LOGIN_FAIL_ID_MESSAGE = "LOGIN FAIL : ID DOES NOT EXIST";

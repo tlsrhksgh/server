@@ -39,4 +39,12 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
 
         return member.account.in(user1, user2);
     }
+
+    public long updateUserImage(String image, String account) {
+        return queryFactory
+                .update(member)
+                .set(member.img, image)
+                .where(member.account.eq(account))
+                .execute();
+    }
 }

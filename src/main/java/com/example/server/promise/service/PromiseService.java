@@ -36,7 +36,8 @@ public class PromiseService {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Promise promise = mapper.convertValue(request.get("info"), Promise.class);
-            promise.setOrganizer(currentUser.getNickname());
+            promise.setLeader(currentUser.getNickname());
+            promise.setCompleted("N");
             List<Map<String, String>> members = mapper.convertValue(request.get("members"), List.class);
             List<PromiseMember> promiseMembers = new ArrayList<>();
             promiseMembers.add(PromiseMember.builder().nickname(currentUser.getNickname()).accepted("Y").build());
@@ -64,11 +65,11 @@ public class PromiseService {
     }
 
     // 약속 목록 조회
-    public CommonResponse getPromiseList(String startDateTime, String endDateTime, Authentication authentication) throws Exception {
+    public CommonResponse getPromiseList(String startDateTime, String endDateTime, String completed,Authentication authentication) throws Exception {
         log.info("PromiseService - getPromiseList : START");
         Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
         try {
-            List<PromiseInterface> result = promiseRepository.selectPromiseList(currentUser.getNickname(), startDateTime, endDateTime);
+            List<PromiseInterface> result = promiseRepository.selectPromiseList(currentUser.getNickname(), startDateTime, endDateTime, completed);
             Map<String, Object> resultMap = new HashMap<>();
             resultMap.put("list", result);
             log.info("PromiseService - getPromiseList : SUCCESS");
@@ -82,6 +83,21 @@ public class PromiseService {
             e.printStackTrace();
             throw new Exception(e);
         }
+    }
+
+    // 약속 단건 조회
+    public CommonResponse getPromiseInfo(String promiseId, Authentication authentication) throws Exception {
+        return new CommonResponse();
+    }
+
+    // 약속 탈퇴
+    public CommonResponse exitPromise(HashMap<String, Object> request, Authentication authentication) throws Exception {
+        return new CommonResponse();
+    }
+
+    // 약속 삭제
+    public CommonResponse deletePromise(HashMap<String, Object> request, Authentication authentication) throws Exception {
+        return new CommonResponse();
     }
 
     // 약속 초대 요청 목록 조회

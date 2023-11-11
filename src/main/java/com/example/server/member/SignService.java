@@ -8,7 +8,9 @@ import com.example.server.security.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.apache.bcel.classfile.Code;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ public class SignService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final CustomMemberRepository customMemberRepository;
 
     // 로그인
     public CommonResponse login(SignRequest request) throws Exception {
@@ -113,5 +116,26 @@ public class SignService {
                 .resultMessage(CodeConst.SUCCESS_MESSAGE)
                 .data(resultMap)
                 .build();
+    }
+
+    // 이미지 변경
+    public CommonResponse changeImage(Map<String, String> request, Authentication authentication) throws Exception {
+        String image = request.get("image");
+        HashMap<String, Object> resultMap = new HashMap<>();
+
+        if (customMemberRepository.updateUserImage(image, authentication.getName()) == 1) {
+            resultMap.put("image", image);
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.SUCCESS_CODE)
+                    .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                    .data(resultMap)
+                    .build();
+        }
+        else {
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.IMAGE_CHANGE_FAIL_CODE)
+                    .resultMessage(CodeConst.IMAGE_CHANGE_FAIL_MESSAGE)
+                    .build();
+        }
     }
 }

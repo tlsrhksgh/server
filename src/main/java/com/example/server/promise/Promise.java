@@ -34,11 +34,13 @@ public class Promise {
 
     private String penalty;
 
-    private String organizer;
+    private String leader;
 
     private String date;
 
     private String memo;
+
+    private String completed;
 
     @CreatedDate
     private LocalDateTime createdDate;
