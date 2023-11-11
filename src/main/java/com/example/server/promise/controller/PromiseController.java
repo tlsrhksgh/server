@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,13 +38,13 @@ public class PromiseController {
 
     // 약속 탈퇴
     @PostMapping(value = "promise/exitPromise")
-    public ResponseEntity<CommonResponse> exitPromise(@RequestBody HashMap<String, Object> request, Authentication authentication) throws Exception {
+    public ResponseEntity<CommonResponse> exitPromise(@RequestBody Map<String, String> request, Authentication authentication) throws Exception {
         return new ResponseEntity<>(promiseService.exitPromise(request, authentication), HttpStatus.OK);
     }
 
     // 약속 삭제
     @PostMapping(value = "promise/deletePromise")
-    public ResponseEntity<CommonResponse> deletePromise(@RequestBody HashMap<String, Object> request, Authentication authentication) throws Exception {
+    public ResponseEntity<CommonResponse> deletePromise(@RequestBody HashMap<String, String> request, Authentication authentication) throws Exception {
         return new ResponseEntity<>(promiseService.deletePromise(request, authentication), HttpStatus.OK);
     }
 

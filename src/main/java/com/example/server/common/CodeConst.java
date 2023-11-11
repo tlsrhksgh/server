@@ -43,4 +43,16 @@ public class CodeConst {
     // 약속 초대 불가능
     public static final String INVITE_FRIEND_FAIL_CODE = "426";
     public static final String INVITE_FRIEND_FAIL_MESSAGE = "CANNOT SEND REQUEST";
+
+    // 약속 탈퇴 실패
+    public static final String PROMISE_EXIT_FAIL_CODE = "427";
+    public static final String PROMISE_EXIT_FAIL_MESSAGE = "CANNOT EXIT PROMISE";
+
+    // 약속 삭제 실패
+    public static final String PROMISE_DELETE_FAIL_CODE = "428";
+    public static final String PROMISE_DELETE_FAIL_MESSAGE = "CANNOT DELETE PROMISE";
+
+    // 약속 단건 조회 실패
+    public static final String PROMISE_INFO_FAIL_CODE = "430";
+    public static final String PROMISE_INFO_FAIL_MESSAGE = "NO THAT PROMISE";
 }
