@@ -4,11 +4,9 @@ import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
 import com.example.server.member.dto.SignRequest;
 import com.example.server.security.JwtProvider;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.apache.bcel.classfile.Code;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -97,7 +96,7 @@ public class SignService {
     // 계정 중복 체크
     public CommonResponse checkAccountDuplicate(String account) {
         boolean result = memberRepository.existsByAccount(account);
-        Map<String ,Object> resultMap = new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("isDuplicated", result);
         return CommonResponse.builder()
                 .resultCode(CodeConst.SUCCESS_CODE)
@@ -109,7 +108,7 @@ public class SignService {
     // 닉네임 중복 체크
     public CommonResponse checkNickNameDuplicate(String nickname) {
         boolean result = memberRepository.existsByNickname(nickname);
-        Map<String ,Object> resultMap = new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("isDuplicated", result);
         return CommonResponse.builder()
                 .resultCode(CodeConst.SUCCESS_CODE)
@@ -119,23 +118,47 @@ public class SignService {
     }
 
     // 이미지 변경
-    public CommonResponse changeImage(Map<String, String> request, Authentication authentication) throws Exception {
-        String image = request.get("image");
-        HashMap<String, Object> resultMap = new HashMap<>();
+//    public CommonResponse changeImage(Map<String, String> request, Authentication authentication) throws Exception {
+//        String image = request.get("image");
+//        HashMap<String, Object> resultMap = new HashMap<>();
+//
+//        if (customMemberRepository.updateUserImage(image, authentication.getName()) == 1) {
+//            resultMap.put("image", image);
+//            return CommonResponse.builder()
+//                    .resultCode(CodeConst.SUCCESS_CODE)
+//                    .resultMessage(CodeConst.SUCCESS_MESSAGE)
+//                    .data(resultMap)
+//                    .build();
+//        }
+//        else {
+//            return CommonResponse.builder()
+//                    .resultCode(CodeConst.IMAGE_CHANGE_FAIL_CODE)
+//                    .resultMessage(CodeConst.IMAGE_CHANGE_FAIL_MESSAGE)
+//                    .build();
+//        }
+//    }
 
-        if (customMemberRepository.updateUserImage(image, authentication.getName()) == 1) {
-            resultMap.put("image", image);
+    // 닉네임, 패스워드, 이미지 변경
+    @Transactional
+    public CommonResponse updateUser(Map<String, String> request, Authentication authentication) {
+        Member member = memberRepository.findMemberByAccount(authentication.getName());
+
+        if (Objects.isNull(member)) {
             return CommonResponse.builder()
-                    .resultCode(CodeConst.SUCCESS_CODE)
-                    .resultMessage(CodeConst.SUCCESS_MESSAGE)
-                    .data(resultMap)
+                    .resultCode(CodeConst.MEMBER_NOT_FOUND_CODE)
+                    .resultMessage(CodeConst.MEMBER_NOT_FOUND_MESSAGE)
                     .build();
         }
-        else {
-            return CommonResponse.builder()
-                    .resultCode(CodeConst.IMAGE_CHANGE_FAIL_CODE)
-                    .resultMessage(CodeConst.IMAGE_CHANGE_FAIL_MESSAGE)
-                    .build();
-        }
+        member.update(request);
+
+        return CommonResponse.builder()
+                .resultCode(CodeConst.SUCCESS_CODE)
+                .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                .build();
+    }
+
+    public void deleteMember(Authentication authentication) {
+        Member member = memberRepository.findMemberByAccount(authentication.getName());
+        memberRepository.delete(member);
     }
 }

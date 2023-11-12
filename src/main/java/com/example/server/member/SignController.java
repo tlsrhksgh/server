@@ -36,8 +36,16 @@ public class SignController {
         return new ResponseEntity<>(memberService.checkNickNameDuplicate(nickname), HttpStatus.OK);
     }
 
-    @PostMapping("/user/changeImage")
-    public ResponseEntity<CommonResponse> changeImage(@RequestBody Map<String, String> request, Authentication authentication) throws Exception {
-        return new ResponseEntity<>(memberService.changeImage(request, authentication), HttpStatus.OK);
+    @PostMapping("/user/update-profile")
+    public ResponseEntity<CommonResponse> updateUserInfo(
+            @RequestBody Map<String, String> request,
+            Authentication authentication) {
+        return ResponseEntity.ok(memberService.updateUser(request, authentication));
+    }
+
+    @DeleteMapping("/user/withdraw")
+    public ResponseEntity<Void> withdrawMember(Authentication authentication) {
+        memberService.deleteMember(authentication);
+        return ResponseEntity.ok().build();
     }
 }
