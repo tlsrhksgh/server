@@ -6,6 +6,10 @@ public class CodeConst {
     public static final String SUCCESS_CODE                                     = "200";
     public static final String SUCCESS_MESSAGE                                  = "REQUEST PROCESSED SUCCESSFULLY";
 
+    // 계정 없음
+    public static final String MEMBER_NOT_FOUND_CODE = "404";
+    public static final String MEMBER_NOT_FOUND_MESSAGE = "MEMBER NOT FOUND";
+
     // 계정 중복
     public static final String DUPLICATED_ACCOUNT_CODE = "410";
     public static final String DUPLICATED_ACCOUNT_MESSAGE = "DUPLICATED ACCOUNT";
