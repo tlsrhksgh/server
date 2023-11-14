@@ -1,4 +1,4 @@
-package com.example.server.chat.domain.model;
+package com.example.server.common.entity;
 
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
