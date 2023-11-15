@@ -1,7 +1,10 @@
 package com.example.server.post.controller;
 
 import com.example.server.post.domain.dto.AllNoticeResponse;
+import com.example.server.post.domain.dto.InquiryListResponse;
 import com.example.server.post.service.PostService;
+import com.example.server.post.service.dto.PostSaveRequest;
+import com.example.server.post.service.dto.ReplySaveRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,18 +17,20 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping("/inquiry")
-    public void saveInquiry() {
+    public ResponseEntity<Void> savePost(@RequestBody PostSaveRequest saveRequest) {
+        postService.savePost(saveRequest);
+        return ResponseEntity.ok().build();
+    }
 
+    @PostMapping("/inquiry/reply")
+    public ResponseEntity<Void> saveReply(@RequestBody ReplySaveRequest saveRequest) {
+        postService.saveReply(saveRequest);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/inquiry/list/{account}")
-    public void inquiryList(@PathVariable String account) {
-
-    }
-
-    @GetMapping("/inquiry/{id}")
-    public void inquiryDetail(@PathVariable Long id) {
-
+    public ResponseEntity<List<InquiryListResponse>> inquiryReplyList(@PathVariable String account) {
+        return ResponseEntity.ok(postService.findInquiryWithReplyList(account));
     }
 
     @GetMapping("/notice/all")
@@ -34,8 +39,7 @@ public class PostController {
     }
 
     @GetMapping("/notice/find/{id}")
-    public ResponseEntity<String> noticeDetail(@PathVariable Long id,
-                                               @RequestParam("type") String type) {
-        return ResponseEntity.ok(postService.findNoticeContent(id, type));
+    public ResponseEntity<String> noticeDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(postService.findNoticeContent(id));
     }
 }
