@@ -1,10 +1,19 @@
 package com.example.server.post.domain;
 
 import com.example.server.common.entity.BaseTimeEntity;
+import com.example.server.post.domain.constants.PostStatusType;
+import com.example.server.post.domain.constants.PostType;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
 
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Entity
 public class Post extends BaseTimeEntity {
 
@@ -12,6 +21,7 @@ public class Post extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String author;
 
     @Column(nullable = false)
@@ -20,10 +30,18 @@ public class Post extends BaseTimeEntity {
     @Column(nullable = false)
     private String content;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Reply> replies;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PostType postType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PostType type;
+    private PostStatusType statusType;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reply> replies;
+
+    public void updateStatusType(PostStatusType statusType) {
+        this.statusType = statusType;
+    }
 }
