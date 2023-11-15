@@ -3,8 +3,8 @@ package com.example.server.post.service;
 import com.example.server.post.domain.Post;
 import com.example.server.post.domain.Reply;
 import com.example.server.post.domain.constants.PostStatusType;
-import com.example.server.post.domain.dto.AllNoticeResponse;
-import com.example.server.post.domain.dto.InquiryListResponse;
+import com.example.server.post.domain.repository.dto.AllNoticeResponse;
+import com.example.server.post.domain.repository.dto.InquiryListResponse;
 import com.example.server.post.domain.repository.CustomPostRepository;
 import com.example.server.post.domain.repository.PostRepository;
 import com.example.server.post.domain.repository.ReplyRepository;
@@ -70,7 +70,6 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public String findNoticeContent(Long postId) {
-
         return customPostRepository.findNoticeContentByIdAndType(postId);
     }
 }
