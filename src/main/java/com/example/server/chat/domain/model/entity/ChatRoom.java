@@ -1,6 +1,6 @@
 package com.example.server.chat.domain.model.entity;
 
-import com.example.server.chat.domain.model.BaseTimeEntity;
+import com.example.server.common.entity.BaseTimeEntity;
 import lombok.Getter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 

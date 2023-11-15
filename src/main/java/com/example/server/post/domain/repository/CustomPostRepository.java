@@ -4,6 +4,8 @@ import com.example.server.common.entity.DateFormatExpression;
 import com.example.server.post.domain.Post;
 import com.example.server.post.domain.constants.PostType;
 import com.example.server.post.domain.dto.*;
+import com.example.server.post.domain.repository.dto.AllNoticeResponse;
+import com.example.server.post.domain.repository.dto.InquiryListResponse;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -63,7 +65,8 @@ public class CustomPostRepository extends QuerydslRepositorySupport {
                         eqType(INQUIRY.getPostType())
                 )
                 .orderBy(post.id.desc())
-                .transform(groupBy(post.id).list(
+                .transform(
+                        groupBy(post.id).list(
                         new QInquiryListResponse(
                                 post.id,
                                 post.title,

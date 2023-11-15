@@ -1,7 +1,7 @@
 package com.example.server.post.controller;
 
-import com.example.server.post.domain.dto.AllNoticeResponse;
-import com.example.server.post.domain.dto.InquiryListResponse;
+import com.example.server.post.domain.repository.dto.AllNoticeResponse;
+import com.example.server.post.domain.repository.dto.InquiryListResponse;
 import com.example.server.post.service.PostService;
 import com.example.server.post.service.dto.PostSaveRequest;
 import com.example.server.post.service.dto.ReplySaveRequest;
@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RequiredArgsConstructor
+@RequestMapping("/post")
 @RestController
 public class PostController {
     private final PostService postService;
