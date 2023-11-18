@@ -3,14 +3,12 @@ package com.example.server.post.domain;
 import com.example.server.common.entity.BaseTimeEntity;
 import com.example.server.post.domain.constants.PostStatusType;
 import com.example.server.post.domain.constants.PostType;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
 
+@Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
