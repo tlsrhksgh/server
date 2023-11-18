@@ -287,30 +287,33 @@ public class PromiseService {
     }
 
     // 약속 초대
-    public CommonResponse inviteFriend(HashMap<String, String> request) throws Exception {
+    public CommonResponse inviteFriend(HashMap<String, Object> request) throws Exception {
         log.info("PromiseService - inviteFriend : START");
+        ObjectMapper mapper = new ObjectMapper();
+        List<Map<String, String>> members = mapper.convertValue(request.get("members"), List.class);
         try {
-            if (promiseMemberRepository.countByPromiseIdAndNickname(Long.parseLong(request.get("promiseId")), request.get("nickname")) > 0) {
-                // 이미 요청이 되었거나 멤버임
-                log.info("PromiseService - inviteFriend : FAIL");
-                return CommonResponse.builder()
-                        .resultCode(CodeConst.INVITE_FRIEND_FAIL_CODE)
-                        .resultMessage(CodeConst.INVITE_FRIEND_FAIL_MESSAGE)
-                        .build();
+            for (Map<String, String> info : members) {
+                String nickname = info.get("nickname");
+                if (promiseMemberRepository.countByPromiseIdAndNickname(mapper.convertValue(request.get("promiseId"), Long.class), nickname) > 0) {
+                    // 이미 요청이 되었거나 멤버임
+                    log.info("PromiseService - inviteFriend : FAIL");
+                    return CommonResponse.builder()
+                            .resultCode(CodeConst.INVITE_FRIEND_FAIL_CODE)
+                            .resultMessage(CodeConst.INVITE_FRIEND_FAIL_MESSAGE)
+                            .build();
+                } else {
+                    Promise promise = promiseRepository.findById(mapper.convertValue(request.get("promiseId"), Long.class)).get();
+                    PromiseMember friend = PromiseMember.builder().accepted("N").nickname(nickname).build();
+                    friend.setPromise(promise);
+                    promise.getMembers().add(friend);
+                    promiseRepository.save(promise);
+                }
             }
-            else {
-                Promise promise = promiseRepository.findById(Long.parseLong(request.get("promiseId"))).get();
-                PromiseMember friend = PromiseMember.builder().accepted("N").nickname(request.get("nickname")).build();
-                friend.setPromise(promise);
-                promise.getMembers().add(friend);
-                promiseRepository.save(promise);
-                log.info("PromiseService - inviteFriend : SUCCESS");
-                return CommonResponse.builder()
-                        .resultCode(CodeConst.SUCCESS_CODE)
-                        .resultMessage(CodeConst.SUCCESS_MESSAGE)
-                        .build();
-            }
-
+            log.info("PromiseService - inviteFriend : SUCCESS");
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.SUCCESS_CODE)
+                    .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                    .build();
         } catch (Exception e) {
             log.error("PromiseService - inviteFriend : Exception");
             e.printStackTrace();
@@ -350,6 +353,9 @@ public class PromiseService {
             List<Map<String, String>> result = mapper.convertValue(request.get("result"), List.class);
             for (Map<String, String> map : result) {
                 promiseMemberRepository.updateIsSucceed(requestId, map.get("nickname"), map.get("isSucceed"));
+                if ("Y".equals(map.get("isSucceed"))) {
+                    memberRepository.updateExp(map.get("nickname"));
+                }
             }
             promiseRepository.updateCompleted(requestId);
 
