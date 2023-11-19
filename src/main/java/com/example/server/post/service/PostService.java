@@ -70,8 +70,9 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public CommonResponse findInquiryWithReplyList(String account) {
-        List<InquiryListResponse> responses = customPostRepository.findInquiryListByAccount(account);
+    public CommonResponse findInquiryWithReplyList(String account, String statusType, Integer period) {
+        List<InquiryListResponse> responses = customPostRepository
+                .findInquiryListByAccount(account, statusType, period);
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("inquiryList", responses);
