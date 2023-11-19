@@ -2,6 +2,7 @@ package com.example.server.post.domain.repository;
 
 import com.example.server.common.entity.DateFormatExpression;
 import com.example.server.post.domain.Post;
+import com.example.server.post.domain.constants.PostStatusType;
 import com.example.server.post.domain.constants.PostType;
 import com.example.server.post.domain.repository.dto.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -9,6 +10,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,7 +39,7 @@ public class CustomPostRepository extends QuerydslRepositorySupport {
                         post.postType.stringValue()
                 ))
                 .from(post)
-                .where(eqType(NOTICE.getPostType()))
+                .where(eqPostType(NOTICE.getPostType()))
                 .orderBy(post.id.desc())
                 .fetch();
     }
@@ -48,19 +50,24 @@ public class CustomPostRepository extends QuerydslRepositorySupport {
                 .from(post)
                 .where(
                         post.id.eq(postId),
-                        eqType(NOTICE.getPostType())
+                        eqPostType(NOTICE.getPostType())
                 )
                 .fetchOne();
     }
 
-    public List<InquiryListResponse> findInquiryListByAccount(String account) {
+    public List<InquiryListResponse> findInquiryListByAccount(String account, String statusType, Integer period) {
+        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime beforeDate = period == 0 ? null : currentDate.minusMonths(period);
+
         return queryFactory
                 .selectFrom(post)
                 .leftJoin(reply)
                 .on(post.id.eq(reply.post().id))
                 .where(
                         post.author.eq(account),
-                        eqType(INQUIRY.getPostType())
+                        eqPostType(INQUIRY.getPostType()),
+                        eqStatusType(statusType),
+                        post.modifiedDate.between(beforeDate, currentDate)
                 )
                 .orderBy(post.id.desc())
                 .transform(
@@ -81,11 +88,19 @@ public class CustomPostRepository extends QuerydslRepositorySupport {
                 );
     }
 
-    private BooleanExpression eqType(String type) {
+    private BooleanExpression eqPostType(String type) {
         if (Objects.isNull(type)) {
             return null;
         }
 
         return post.postType.eq(PostType.valueOf(type));
+    }
+
+    private BooleanExpression eqStatusType(String type) {
+        if (Objects.isNull(type)) {
+            return null;
+        }
+
+        return post.statusType.eq(PostStatusType.valueOf(type));
     }
 }

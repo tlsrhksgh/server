@@ -25,8 +25,15 @@ public class PostController {
     }
 
     @GetMapping("/inquiry/list/{account}")
-    public ResponseEntity<CommonResponse> inquiryReplyList(@PathVariable String account) {
-        return ResponseEntity.ok(postService.findInquiryWithReplyList(account));
+    public ResponseEntity<CommonResponse> inquiryReplyList(
+            @PathVariable String account,
+            @RequestParam(required = false) String statusType,
+            @RequestParam(required = false, defaultValue = "0") Integer period) {
+        if(period > 12) {
+            throw new RuntimeException("조회 기간을 초과하였습니다.");
+        }
+
+        return ResponseEntity.ok(postService.findInquiryWithReplyList(account, statusType, period));
     }
 
     @GetMapping("/notice/all")
