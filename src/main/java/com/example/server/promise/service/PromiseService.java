@@ -126,7 +126,7 @@ public class PromiseService {
         try {
             Promise promise = promiseRepository.findPromiseById(Long.parseLong(request.get("promiseId")));
             if (Objects.isNull(promise)) {
-                log.error("PromiseService - deletePromise : FAIL");
+                log.error("PromiseService - exitPromise : FAIL");
                 return CommonResponse.builder()
                         .resultCode(CodeConst.PROMISE_INFO_FAIL_CODE)
                         .resultMessage(CodeConst.PROMISE_INFO_FAIL_MESSAGE)
@@ -134,30 +134,40 @@ public class PromiseService {
             }
             // 방장이 나갈 때
             if (currentUser.getNickname().equals(promise.getLeader())) {
-                List<MemberInterface> members = promiseMemberRepository.findMembers(request.get("promiseId"));
+                List<MemberInterface> members = promiseMemberRepository.findAcceptedMembers(request.get("promiseId"));
                 String curLeader = currentUser.getNickname();
                 String newLeader = "";
+                boolean isFind = false;
                 for (MemberInterface member : members) {
                     if (!member.getNickname().equals(curLeader)) {
+                        isFind = true;
                         newLeader = member.getNickname();
                         break;
                     }
                 }
-                if (promiseRepository.updateLeader(request.get("promiseId"), newLeader) == 1 && promiseMemberRepository.deletePromiseMemberByPromiseIdAndNickname(Long.parseLong(request.get("promiseId")), currentUser.getNickname()) == 1 ) {
-                    log.info("PromiseService - deletePromise : SUCCESS");
+                if (!isFind) {
+                    promiseMemberRepository.deletePromiseMembersByPromiseId(Long.parseLong(request.get("promiseId")));
+                    promiseRepository.deleteById(Long.parseLong(request.get("promiseId")));
                     return CommonResponse.builder()
                             .resultCode(CodeConst.SUCCESS_CODE)
                             .resultMessage(CodeConst.SUCCESS_MESSAGE)
                             .build();
                 }
-                log.info("PromiseService - deletePromise : SUCCESS");
+                if (promiseRepository.updateLeader(request.get("promiseId"), newLeader) == 1 && promiseMemberRepository.deletePromiseMemberByPromiseIdAndNickname(Long.parseLong(request.get("promiseId")), currentUser.getNickname()) == 1 ) {
+                    log.info("PromiseService - exitPromise : SUCCESS");
+                    return CommonResponse.builder()
+                            .resultCode(CodeConst.SUCCESS_CODE)
+                            .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                            .build();
+                }
+                log.info("PromiseService - exitPromise : SUCCESS");
                 return CommonResponse.builder()
                         .resultCode(CodeConst.SUCCESS_CODE)
                         .resultMessage(CodeConst.SUCCESS_MESSAGE)
                         .build();
             } else {
                 if (promiseMemberRepository.deletePromiseMemberByPromiseIdAndNickname(Long.parseLong(request.get("promiseId")), currentUser.getNickname()) == 1 ) {
-                    log.info("PromiseService - deletePromise : SUCCESS");
+                    log.info("PromiseService - exitPromise : SUCCESS");
                     return CommonResponse.builder()
                             .resultCode(CodeConst.SUCCESS_CODE)
                             .resultMessage(CodeConst.SUCCESS_MESSAGE)

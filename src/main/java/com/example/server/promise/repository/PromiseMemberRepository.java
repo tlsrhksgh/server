@@ -32,6 +32,13 @@ public interface PromiseMemberRepository extends JpaRepository<PromiseMember, Lo
             , nativeQuery = true)
     List<MemberInterface> findMembers(String promiseId) throws Exception;
 
+    @Query(value = "SELECT nickname, img, level " +
+            "FROM Member m " +
+            "WHERE m.nickname IN ( " +
+            "SELECT pm.nickname FROM PromiseMember pm WHERE pm.promise_id = ?1 AND pm.accepted = 'Y')"
+            , nativeQuery = true)
+    List<MemberInterface> findAcceptedMembers(String promiseId) throws Exception;
+
     @Modifying
     Integer deletePromiseMembersByPromiseId(Long promiseId) throws Exception;
 

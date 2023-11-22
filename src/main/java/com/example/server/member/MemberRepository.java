@@ -21,7 +21,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Modifying(clearAutomatically = true)
     @Query(value = "UPDATE Member " +
-            "SET exp = exp + 1 " +
+            "SET level = CASE WHEN exp = 9 THEN level + 1 ELSE level END, exp = CASE WHEN exp = 9 THEN 0 ELSE exp + 1 END " +
             "WHERE nickname = ?1"
             , nativeQuery = true)
     Integer updateExp(String nickname) throws Exception;
