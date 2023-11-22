@@ -2,6 +2,7 @@ package com.example.server.member;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
+import com.example.server.member.dto.MemberUpdateRequest;
 import com.example.server.member.dto.SignRequest;
 import com.example.server.security.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -93,6 +94,14 @@ public class SignService {
         }
     }
 
+    public void sendVerifyCode() {
+        String verifyCode = getRandomCode();
+    }
+
+    private String getRandomCode() {
+        return null;
+    }
+
     // 계정 중복 체크
     public CommonResponse checkAccountDuplicate(String account) {
         boolean result = memberRepository.existsByAccount(account);
@@ -140,7 +149,7 @@ public class SignService {
 
     // 닉네임, 패스워드, 이미지 변경
     @Transactional
-    public CommonResponse updateUser(Map<String, String> request, Authentication authentication) {
+    public CommonResponse updateUser(MemberUpdateRequest request, Authentication authentication) {
         Member member = memberRepository.findMemberByAccount(authentication.getName());
 
         if (Objects.isNull(member)) {
@@ -157,8 +166,13 @@ public class SignService {
                 .build();
     }
 
-    public void deleteMember(Authentication authentication) {
+    public CommonResponse deleteMember(Authentication authentication) {
         Member member = memberRepository.findMemberByAccount(authentication.getName());
         memberRepository.delete(member);
+
+        return CommonResponse.builder()
+                .resultMessage(CodeConst.SUCCESS_CODE)
+                .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                .build();
     }
 }
