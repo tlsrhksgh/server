@@ -1,6 +1,7 @@
 package com.example.server.member;
 
 import com.example.server.common.CommonResponse;
+import com.example.server.member.dto.MemberUpdateRequest;
 import com.example.server.member.dto.SignRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,16 +37,15 @@ public class SignController {
         return new ResponseEntity<>(memberService.checkNickNameDuplicate(nickname), HttpStatus.OK);
     }
 
-    @PostMapping("/user/update-profile")
+    @PatchMapping("/member/update-profile")
     public ResponseEntity<CommonResponse> updateUserInfo(
-            @RequestBody Map<String, String> request,
+            @RequestBody MemberUpdateRequest request,
             Authentication authentication) {
         return ResponseEntity.ok(memberService.updateUser(request, authentication));
     }
 
-    @DeleteMapping("/user/withdraw")
-    public ResponseEntity<Void> withdrawMember(Authentication authentication) {
-        memberService.deleteMember(authentication);
-        return ResponseEntity.ok().build();
+    @DeleteMapping("/member/withdraw")
+    public ResponseEntity<CommonResponse> withdrawMember(Authentication authentication) {
+        return ResponseEntity.ok(memberService.deleteMember(authentication));
     }
 }

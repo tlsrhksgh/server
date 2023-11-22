@@ -1,6 +1,7 @@
 package com.example.server.member;
 
 import com.example.server.chat.domain.model.entity.MemberChatRoom;
+import com.example.server.member.dto.MemberUpdateRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,9 +47,9 @@ public class Member {
         roles.forEach(o -> o.setMember(this));
     }
 
-    public void update(Map<String, String> request) {
-        this.nickname = request.containsKey("nickname") ? request.get("nickname") : nickname;
-        this.img = request.containsKey("img") ? request.get("img") : img;
-        this.password = request.containsKey("password") ? request.get("password") : password;
+    public void update(MemberUpdateRequest request) {
+        this.nickname = Objects.isNull(request.getNickname()) ? nickname : request.getNickname();
+        this.img = Objects.isNull(request.getImg()) ? img : request.getImg();
+        this.password = Objects.isNull(request.getPassword()) ? password : request.getPassword();
     }
 }
