@@ -30,11 +30,12 @@ public class CustomPostRepository extends QuerydslRepositorySupport {
         this.queryFactory = queryFactory;
     }
 
-    public List<AllNoticeResponse> findAllNotice() {
+    public List<AllNoticeResponse> findAllNoticeByAccount() {
         return queryFactory
                 .select(new QAllNoticeResponse(
                         post.id,
                         post.title,
+                        post.content,
                         DateFormatExpression.formatDateTime(post.createdDate),
                         post.postType.stringValue()
                 ))
@@ -75,12 +76,14 @@ public class CustomPostRepository extends QuerydslRepositorySupport {
                         new QInquiryListResponse(
                                 post.id,
                                 post.title,
+                                post.content,
                                 DateFormatExpression.formatDateTime(post.createdDate),
                                 post.statusType.stringValue(),
                                 list(new QReplyDto(
                                         reply.id,
                                         reply.title,
                                         reply.content,
+                                        reply.author,
                                         DateFormatExpression.formatDateTime(reply.modifiedDate))
                                         .skipNulls()
                                 ))
