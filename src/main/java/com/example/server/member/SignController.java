@@ -9,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequiredArgsConstructor
 public class SignController {
@@ -35,6 +33,11 @@ public class SignController {
     @GetMapping("/{nickname}/exists/nickname")
     public ResponseEntity<CommonResponse> checkNickNameDuplicate(@PathVariable String nickname) {
         return new ResponseEntity<>(memberService.checkNickNameDuplicate(nickname), HttpStatus.OK);
+    }
+
+    @PostMapping("/member/verify-code")
+    public ResponseEntity<CommonResponse> checkVerifyCode(@RequestBody String email) {
+        return ResponseEntity.ok(memberService.sendVerifyCode(email));
     }
 
     @PatchMapping("/member/update-profile")
