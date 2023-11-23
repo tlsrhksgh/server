@@ -2,13 +2,13 @@ package com.example.server.member;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
-import com.example.server.member.client.MailgunClient;
-import com.example.server.member.client.mailgun.SendMailForm;
+import com.example.server.member.component.MailComponent;
 import com.example.server.member.dto.SignRequest;
 import com.example.server.security.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,11 +24,10 @@ import java.util.concurrent.ThreadLocalRandom;
 @Transactional
 @RequiredArgsConstructor
 public class SignService {
-
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
-    private final MailgunClient mailgunClient;
+    private final MailComponent mailComponent;
 
     // 로그인
     public CommonResponse login(SignRequest request) throws Exception {
@@ -94,17 +93,10 @@ public class SignService {
         }
     }
 
-    public CommonResponse sendVerifyCode(String email) {
+    public CommonResponse sendVerifyCode(String account) {
         String verifyCode = String.valueOf(getRandomCode());
 
-        SendMailForm sendMailForm = SendMailForm.builder()
-                .from("admin@gmail.com")
-                .to(email)
-                .subject("약속앱 - 회원가입 인증번호 입니다")
-                .text(getVerificationEmailBody(email, verifyCode))
-                .build();
-
-        mailgunClient.sendEmail(sendMailForm);
+        mailComponent.sendMail(account, getVerificationEmailBody(verifyCode));
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("verifyCode", verifyCode);
@@ -119,9 +111,9 @@ public class SignService {
         return ThreadLocalRandom.current().nextInt(100000, 1000000);
     }
 
-    private String getVerificationEmailBody(String email, String verifyCode) {
+    private String getVerificationEmailBody(String verifyCode) {
         StringBuilder sb = new StringBuilder();
-        return sb.append("인증 번호를 확인해주세요.\n\n")
+        return sb.append("아래의 인증 번호를 확인해주세요.\n\n")
                 .append(verifyCode).toString();
     }
 
@@ -148,26 +140,5 @@ public class SignService {
                 .data(resultMap)
                 .build();
     }
-
-    // 이미지 변경
-//    public CommonResponse changeImage(Map<String, String> request, Authentication authentication) throws Exception {
-//        String image = request.get("image");
-//        HashMap<String, Object> resultMap = new HashMap<>();
-//
-//        if (customMemberRepository.updateUserImage(image, authentication.getName()) == 1) {
-//            resultMap.put("image", image);
-//            return CommonResponse.builder()
-//                    .resultCode(CodeConst.SUCCESS_CODE)
-//                    .resultMessage(CodeConst.SUCCESS_MESSAGE)
-//                    .data(resultMap)
-//                    .build();
-//        }
-//        else {
-//            return CommonResponse.builder()
-//                    .resultCode(CodeConst.IMAGE_CHANGE_FAIL_CODE)
-//                    .resultMessage(CodeConst.IMAGE_CHANGE_FAIL_MESSAGE)
-//                    .build();
-//        }
-//    }
 
 }

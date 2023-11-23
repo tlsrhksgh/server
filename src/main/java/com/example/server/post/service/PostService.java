@@ -31,7 +31,6 @@ public class PostService {
     private final CustomPostRepository customPostRepository;
     private final PostRepository postRepository;
     private final ReplyRepository replyRepository;
-    private final MemberRepository memberRepository;
 
     public CommonResponse savePost(PostSaveRequest saveRequest) {
         PostStatusType statusType = saveRequest.getType().getPostType().equals("NOTICE") ?
