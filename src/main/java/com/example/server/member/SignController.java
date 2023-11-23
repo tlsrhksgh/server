@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 public class SignController {
@@ -33,7 +35,7 @@ public class SignController {
     }
 
     @PostMapping("/verify-code")
-    public ResponseEntity<CommonResponse> checkVerifyCode(@RequestBody String email) {
-        return ResponseEntity.ok(signService.sendVerifyCode(email));
+    public ResponseEntity<CommonResponse> checkVerifyCode(@RequestBody Map<String, String> request) {
+        return ResponseEntity.ok(signService.sendVerifyCode(request.get("account")));
     }
 }
