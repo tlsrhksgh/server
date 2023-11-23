@@ -6,6 +6,7 @@ import com.example.server.post.service.dto.PostSaveRequest;
 import com.example.server.post.service.dto.ReplySaveRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -37,12 +38,7 @@ public class PostController {
     }
 
     @GetMapping("/notice/all")
-    public ResponseEntity<CommonResponse> findAllNotice() {
+    public ResponseEntity<CommonResponse> findAllNotice(Authentication authentication) {
         return ResponseEntity.ok(postService.findAllTypeNotice());
-    }
-
-    @GetMapping("/notice/find/{id}")
-    public ResponseEntity<CommonResponse> noticeDetail(@PathVariable Long id) {
-        return ResponseEntity.ok(postService.findNoticeContent(id));
     }
 }

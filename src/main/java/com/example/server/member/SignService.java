@@ -2,6 +2,8 @@ package com.example.server.member;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
+import com.example.server.member.client.MailgunClient;
+import com.example.server.member.client.mailgun.SendMailForm;
 import com.example.server.member.dto.MemberUpdateRequest;
 import com.example.server.member.dto.SignRequest;
 import com.example.server.security.JwtProvider;
@@ -18,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @Slf4j
@@ -28,7 +31,7 @@ public class SignService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
-    private final CustomMemberRepository customMemberRepository;
+    private final MailgunClient mailgunClient;
 
     // 로그인
     public CommonResponse login(SignRequest request) throws Exception {
@@ -94,12 +97,35 @@ public class SignService {
         }
     }
 
-    public void sendVerifyCode() {
-        String verifyCode = getRandomCode();
+    public CommonResponse sendVerifyCode(String email) {
+        String verifyCode = String.valueOf(getRandomCode());
+
+        SendMailForm sendMailForm = SendMailForm.builder()
+                .from("admin@gmail.com")
+                .to(email)
+                .subject("약속앱 - 회원가입 인증번호 입니다")
+                .text(getVerificationEmailBody(email, verifyCode))
+                .build();
+
+        mailgunClient.sendEmail(sendMailForm);
+
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("verifyCode", verifyCode);
+        return CommonResponse.builder()
+                .resultCode(CodeConst.SUCCESS_CODE)
+                .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                .data(resultMap)
+                .build();
     }
 
-    private String getRandomCode() {
-        return null;
+    private int getRandomCode() {
+        return ThreadLocalRandom.current().nextInt(100000, 1000000);
+    }
+
+    private String getVerificationEmailBody(String email, String verifyCode) {
+        StringBuilder sb = new StringBuilder();
+        return sb.append("인증 번호를 확인해주세요.\n\n")
+                .append(verifyCode).toString();
     }
 
     // 계정 중복 체크

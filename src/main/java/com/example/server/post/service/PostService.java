@@ -2,6 +2,8 @@ package com.example.server.post.service;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
+import com.example.server.member.Member;
+import com.example.server.member.MemberRepository;
 import com.example.server.post.domain.Post;
 import com.example.server.post.domain.Reply;
 import com.example.server.post.domain.constants.PostStatusType;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.example.server.post.domain.constants.PostStatusType.*;
 
@@ -28,6 +31,7 @@ public class PostService {
     private final CustomPostRepository customPostRepository;
     private final PostRepository postRepository;
     private final ReplyRepository replyRepository;
+    private final MemberRepository memberRepository;
 
     public CommonResponse savePost(PostSaveRequest saveRequest) {
         PostStatusType statusType = saveRequest.getType().getPostType().equals("NOTICE") ?
@@ -85,23 +89,10 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public CommonResponse findAllTypeNotice() {
-        List<AllNoticeResponse> responses = customPostRepository.findAllNotice();
+        List<AllNoticeResponse> responses = customPostRepository.findAllNoticeByAccount();
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("noticeList", responses);
-        return CommonResponse.builder()
-                .resultCode(CodeConst.SUCCESS_CODE)
-                .resultMessage(CodeConst.SUCCESS_MESSAGE)
-                .data(resultMap)
-                .build();
-    }
-
-    @Transactional(readOnly = true)
-    public CommonResponse findNoticeContent(Long postId) {
-        String noticeContent = customPostRepository.findNoticeContentByIdAndType(postId);
-
-        Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put("noticeContent", noticeContent);
         return CommonResponse.builder()
                 .resultCode(CodeConst.SUCCESS_CODE)
                 .resultMessage(CodeConst.SUCCESS_MESSAGE)
