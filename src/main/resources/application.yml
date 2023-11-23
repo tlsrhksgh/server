@@ -29,3 +29,6 @@ spring:
 jwt:
   secret:
     key: x!A%D*G-KaPdSgVkYp3s5v8y/B?E(H+M
+
+mailgun:
+  key: mailgun
