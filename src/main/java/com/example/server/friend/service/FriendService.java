@@ -6,6 +6,7 @@ import com.example.server.friend.Friend;
 import com.example.server.friend.dto.FriendInterface;
 import com.example.server.friend.dto.FriendRequestDto;
 import com.example.server.friend.repository.FriendRepository;
+import com.example.server.member.CustomMemberRepository;
 import com.example.server.member.Member;
 import com.example.server.member.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,11 +30,12 @@ public class FriendService {
 
     private final FriendRepository friendRepository;
     private final MemberRepository memberRepository;
+    private final CustomMemberRepository customMemberRepository;
 
     // 친구 추가 요청
     public CommonResponse addRequest(FriendRequestDto request, Authentication authentication) throws Exception {
         log.info("FriendService - addRequest : START");
-        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+        Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
 
         try {
             if (!memberRepository.existsByNickname(request.getRespondent())) {
@@ -72,7 +74,7 @@ public class FriendService {
     // 친구 추가 요청 목록 조회
     public CommonResponse selectRequestList(Authentication authentication) throws Exception {
         log.info("FriendService - selectRequestList : START");
-        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+        Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
             List<FriendInterface> requestList = friendRepository.selectRequestList(currentUser.getNickname());
             Map<String, Object> resultMap = new HashMap<>();
@@ -113,7 +115,7 @@ public class FriendService {
     // 친구 추가 요청 수락
     public CommonResponse acceptRequest(FriendRequestDto request, Authentication authentication) throws Exception {
         log.info("FriendService - acceptRequest : START");
-        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+        Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
             if (friendRepository.updateAcceptedY(request.getRequestId(), currentUser.getNickname()) == 1) {
                 log.info("FriendService - acceptRequest : SUCCESS");
@@ -139,7 +141,7 @@ public class FriendService {
     // 친구 추가 요청 거절
     public CommonResponse rejectRequest(FriendRequestDto request, Authentication authentication) throws Exception {
         log.info("FriendService - rejectRequest : START");
-        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+        Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
             if (friendRepository.deleteFriendByIdAndRespondent(Long.parseLong(request.getRequestId()), currentUser.getNickname()) == 1) {
                 log.info("FriendService - rejectRequest : SUCCESS");
@@ -165,7 +167,7 @@ public class FriendService {
     // 친구 목록 조회
     public CommonResponse getFriendList(Authentication authentication) throws Exception {
         log.info("FriendService - getFriendList : START");
-        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+        Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
             List<FriendInterface> result = friendRepository.selectFriendList(currentUser.getNickname());
             ObjectMapper mapper = new ObjectMapper();

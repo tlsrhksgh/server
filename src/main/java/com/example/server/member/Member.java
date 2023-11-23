@@ -1,7 +1,6 @@
 package com.example.server.member;
 
 import com.example.server.chat.domain.model.entity.MemberChatRoom;
-import com.example.server.member.dto.MemberUpdateRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,7 +20,7 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long memberId;
 
-    @Column(unique = true)
+    @Column(unique = true, updatable = false)
     private String account;
 
     private String password;
@@ -35,7 +34,7 @@ public class Member {
     @Lob
     private String img;
 
-    @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Authority> roles = new ArrayList<>();
 
@@ -47,9 +46,9 @@ public class Member {
         roles.forEach(o -> o.setMember(this));
     }
 
-    public void update(MemberUpdateRequest request) {
-        this.nickname = Objects.isNull(request.getNickname()) ? nickname : request.getNickname();
-        this.img = Objects.isNull(request.getImg()) ? img : request.getImg();
-        this.password = Objects.isNull(request.getPassword()) ? password : request.getPassword();
+    public void update(Map<String, String> request) {
+        this.nickname = Objects.isNull(request.get("nickname")) ? nickname : request.get("nickname");
+        this.img = Objects.isNull(request.get("img")) ? img : request.get("img");
+        this.password = Objects.isNull(request.get("password")) ? password : request.get("password");
     }
 }

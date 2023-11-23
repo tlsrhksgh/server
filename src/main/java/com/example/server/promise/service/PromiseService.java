@@ -2,6 +2,7 @@ package com.example.server.promise.service;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
+import com.example.server.member.CustomMemberRepository;
 import com.example.server.member.Member;
 import com.example.server.member.MemberInterface;
 import com.example.server.member.MemberRepository;
@@ -30,12 +31,13 @@ public class PromiseService {
 
     private final PromiseRepository promiseRepository;
     private final PromiseMemberRepository promiseMemberRepository;
+    private final CustomMemberRepository customMemberRepository;
     private final MemberRepository memberRepository;
 
     // 약속 생성
     public CommonResponse createPromise(HashMap<String, Object> request, Authentication authentication) throws Exception {
         log.info("PromiseService - createPromise : START");
-        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+        Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
             ObjectMapper mapper = new ObjectMapper();
             Promise promise = mapper.convertValue(request.get("info"), Promise.class);
@@ -70,7 +72,7 @@ public class PromiseService {
     // 약속 목록 조회
     public CommonResponse getPromiseList(String startDateTime, String endDateTime, String completed,Authentication authentication) throws Exception {
         log.info("PromiseService - getPromiseList : START");
-        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+        Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
             List<PromiseInterface> result = promiseRepository.selectPromiseList(currentUser.getNickname(), startDateTime, endDateTime, completed);
             Map<String, Object> resultMap = new HashMap<>();
@@ -122,7 +124,7 @@ public class PromiseService {
     @Transactional
     public CommonResponse exitPromise(Map<String, String> request, Authentication authentication) throws Exception {
         log.info("PromiseService - exitPromise : START");
-        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+        Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
             Promise promise = promiseRepository.findPromiseById(Long.parseLong(request.get("promiseId")));
             if (Objects.isNull(promise)) {
@@ -190,7 +192,7 @@ public class PromiseService {
     // 약속 삭제
     public CommonResponse deletePromise(HashMap<String, String> request, Authentication authentication) throws Exception {
         log.info("PromiseService - deletePromise : START");
-        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+        Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
             Promise promise = promiseRepository.findPromiseById(Long.parseLong(request.get("promiseId")));
             if (Objects.isNull(promise)) {
@@ -225,7 +227,7 @@ public class PromiseService {
     // 약속 초대 요청 목록 조회
     public CommonResponse getPromiseRequestList(Authentication authentication) throws Exception {
         log.info("PromiseService - getPromiseRequestList : START");
-        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+        Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
             List<PromiseInterface> result = promiseRepository.selectPromiseRequestList(currentUser.getNickname());
             Map<String, Object> resultMap = new HashMap<>();
@@ -247,7 +249,7 @@ public class PromiseService {
     // 약속 초대 요청 수락
     public CommonResponse acceptPromiseRequest(PromiseRequestDto request, Authentication authentication) throws Exception {
         log.info("PromiseService - acceptPromiseRequest : START");
-        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+        Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
             if (promiseMemberRepository.updateAcceptedY(request.getId(), currentUser.getNickname()) == 1) {
                 log.info("PromiseService - acceptPromiseRequest : SUCCESS");
@@ -273,7 +275,7 @@ public class PromiseService {
     // 약속 초대 요청 거절
     public CommonResponse rejectPromiseRequest(PromiseRequestDto request, Authentication authentication) throws Exception {
         log.info("PromiseService - rejectPromiseRequest : START");
-        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+        Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
             if (promiseMemberRepository.deletePromiseMemberByPromiseIdAndNickname(Long.parseLong(request.getId()), currentUser.getNickname()) == 1) {
                 log.info("PromiseService - rejectPromiseRequest : SUCCESS");
