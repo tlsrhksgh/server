@@ -4,14 +4,12 @@ import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
 import com.example.server.member.client.MailgunClient;
 import com.example.server.member.client.mailgun.SendMailForm;
-import com.example.server.member.dto.MemberUpdateRequest;
 import com.example.server.member.dto.SignRequest;
 import com.example.server.security.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -173,32 +170,4 @@ public class SignService {
 //        }
 //    }
 
-    // 닉네임, 패스워드, 이미지 변경
-    @Transactional
-    public CommonResponse updateUser(MemberUpdateRequest request, Authentication authentication) {
-        Member member = memberRepository.findMemberByAccount(authentication.getName());
-
-        if (Objects.isNull(member)) {
-            return CommonResponse.builder()
-                    .resultCode(CodeConst.MEMBER_NOT_FOUND_CODE)
-                    .resultMessage(CodeConst.MEMBER_NOT_FOUND_MESSAGE)
-                    .build();
-        }
-        member.update(request);
-
-        return CommonResponse.builder()
-                .resultCode(CodeConst.SUCCESS_CODE)
-                .resultMessage(CodeConst.SUCCESS_MESSAGE)
-                .build();
-    }
-
-    public CommonResponse deleteMember(Authentication authentication) {
-        Member member = memberRepository.findMemberByAccount(authentication.getName());
-        memberRepository.delete(member);
-
-        return CommonResponse.builder()
-                .resultMessage(CodeConst.SUCCESS_CODE)
-                .resultMessage(CodeConst.SUCCESS_MESSAGE)
-                .build();
-    }
 }
