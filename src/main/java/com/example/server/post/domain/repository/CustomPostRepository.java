@@ -30,7 +30,7 @@ public class CustomPostRepository extends QuerydslRepositorySupport {
         this.queryFactory = queryFactory;
     }
 
-    public List<AllNoticeResponse> findAllNoticeByAccount() {
+    public List<AllNoticeResponse> findAllNotice() {
         return queryFactory
                 .select(new QAllNoticeResponse(
                         post.id,
@@ -45,30 +45,19 @@ public class CustomPostRepository extends QuerydslRepositorySupport {
                 .fetch();
     }
 
-    public String findNoticeContentByIdAndType(Long postId) {
-        return queryFactory
-                .select(post.content)
-                .from(post)
-                .where(
-                        post.id.eq(postId),
-                        eqPostType(NOTICE.getPostType())
-                )
-                .fetchOne();
-    }
-
-    public List<InquiryListResponse> findInquiryListByAccount(String account, String statusType, Integer period) {
+    public List<InquiryListResponse> findInquiryListByAccount(String nickname, String statusType, Integer period) {
         LocalDateTime currentDate = LocalDateTime.now();
-        LocalDateTime beforeDate = period == 0 ? null : currentDate.minusMonths(period);
+        LocalDateTime selectStartDate = period == 0 ? null : currentDate.minusMonths(period);
 
         return queryFactory
                 .selectFrom(post)
                 .leftJoin(reply)
                 .on(post.id.eq(reply.post().id))
                 .where(
-                        post.author.eq(account),
+                        eqPostAuthor(nickname),
                         eqPostType(INQUIRY.getPostType()),
                         eqStatusType(statusType),
-                        post.modifiedDate.between(beforeDate, currentDate)
+                        post.modifiedDate.between(selectStartDate, currentDate)
                 )
                 .orderBy(post.id.desc())
                 .transform(
@@ -77,6 +66,7 @@ public class CustomPostRepository extends QuerydslRepositorySupport {
                                 post.id,
                                 post.title,
                                 post.content,
+                                post.author,
                                 DateFormatExpression.formatDateTime(post.createdDate),
                                 post.statusType.stringValue(),
                                 list(new QReplyDto(
@@ -105,5 +95,13 @@ public class CustomPostRepository extends QuerydslRepositorySupport {
         }
 
         return post.statusType.eq(PostStatusType.valueOf(type));
+    }
+
+    private BooleanExpression eqPostAuthor(String author) {
+        if (Objects.isNull(author)) {
+            return null;
+        }
+
+        return post.author.eq(author);
     }
 }

@@ -2,8 +2,8 @@ package com.example.server.post.service;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
+import com.example.server.member.CustomMemberRepository;
 import com.example.server.member.Member;
-import com.example.server.member.MemberRepository;
 import com.example.server.post.domain.Post;
 import com.example.server.post.domain.Reply;
 import com.example.server.post.domain.constants.PostStatusType;
@@ -18,10 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static com.example.server.post.domain.constants.PostStatusType.*;
 
@@ -31,6 +28,7 @@ public class PostService {
     private final CustomPostRepository customPostRepository;
     private final PostRepository postRepository;
     private final ReplyRepository replyRepository;
+    private final CustomMemberRepository customMemberRepository;
 
     public CommonResponse savePost(PostSaveRequest saveRequest) {
         PostStatusType statusType = saveRequest.getType().getPostType().equals("NOTICE") ?
@@ -51,7 +49,6 @@ public class PostService {
                 .build();
     }
 
-    @Transactional
     public CommonResponse saveReply(ReplySaveRequest saveRequest) {
         Post post = postRepository.findById(saveRequest.getPostId())
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 글 입니다."));
@@ -74,8 +71,15 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public CommonResponse findInquiryWithReplyList(String account, String statusType, Integer period) {
-        List<InquiryListResponse> responses = customPostRepository
-                .findInquiryListByAccount(account, statusType, period);
+        Member member = customMemberRepository.findMemberByAccount(account);
+
+        List<InquiryListResponse> responses = new ArrayList<>();
+
+        if(Objects.nonNull(member) && member.getRoles().get(0).getName().equals("ROLE_ADMIN")) {
+            responses = customPostRepository.findInquiryListByAccount(null, null, period);
+        } else if(Objects.nonNull(member)) {
+            responses = customPostRepository.findInquiryListByAccount(member.getNickname(), statusType, period);
+        }
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("inquiryList", responses);
@@ -88,7 +92,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public CommonResponse findAllTypeNotice() {
-        List<AllNoticeResponse> responses = customPostRepository.findAllNoticeByAccount();
+        List<AllNoticeResponse> responses = customPostRepository.findAllNotice();
 
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("noticeList", responses);
