@@ -49,6 +49,7 @@ public class CustomPostRepository extends QuerydslRepositorySupport {
         LocalDateTime currentDate = LocalDateTime.now();
         LocalDateTime selectStartDate = period == 0 ? null : currentDate.minusMonths(period);
 
+
         return queryFactory
                 .selectFrom(post)
                 .leftJoin(reply)
@@ -62,21 +63,21 @@ public class CustomPostRepository extends QuerydslRepositorySupport {
                 .orderBy(post.id.desc())
                 .transform(
                         groupBy(post.id).list(
-                        new QInquiryListResponse(
-                                post.id,
-                                post.title,
-                                post.content,
-                                post.author,
-                                DateFormatExpression.formatDateTime(post.createdDate),
-                                post.statusType.stringValue(),
-                                list(new QReplyDto(
-                                        reply.id,
-                                        reply.title,
-                                        reply.content,
-                                        reply.author,
-                                        DateFormatExpression.formatDateTime(reply.modifiedDate))
-                                        .skipNulls()
-                                ))
+                                new QInquiryListResponse(
+                                        post.id,
+                                        post.title,
+                                        post.content,
+                                        post.author,
+                                        DateFormatExpression.formatDateTime(post.createdDate),
+                                        post.statusType.stringValue(),
+                                        list(new QReplyDto(
+                                                reply.id,
+                                                reply.title,
+                                                reply.content,
+                                                reply.author,
+                                                DateFormatExpression.formatDateTime(reply.modifiedDate))
+                                                .skipNulls()
+                                        ))
                         )
                 );
     }
@@ -97,11 +98,11 @@ public class CustomPostRepository extends QuerydslRepositorySupport {
         return post.statusType.eq(PostStatusType.valueOf(type));
     }
 
-    private BooleanExpression eqPostAuthor(String author) {
-        if (Objects.isNull(author)) {
+    private BooleanExpression eqPostAuthor(String nickname) {
+        if (Objects.isNull(nickname)) {
             return null;
         }
 
-        return post.author.eq(author);
+        return post.author.eq(nickname);
     }
 }

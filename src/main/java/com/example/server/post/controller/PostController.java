@@ -38,7 +38,7 @@ public class PostController {
     }
 
     @GetMapping("/notice/all")
-    public ResponseEntity<CommonResponse> findAllNotice(Authentication authentication) {
+    public ResponseEntity<CommonResponse> findAllNotice() {
         return ResponseEntity.ok(postService.findAllTypeNotice());
     }
 }

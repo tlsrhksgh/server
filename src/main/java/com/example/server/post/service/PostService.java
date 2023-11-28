@@ -31,15 +31,24 @@ public class PostService {
     private final CustomMemberRepository customMemberRepository;
 
     public CommonResponse savePost(PostSaveRequest saveRequest) {
+        Member member = customMemberRepository.findMemberByNickname(saveRequest.getAuthor());
+
+        if(Objects.isNull(member)) {
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.MEMBER_NOT_FOUND_CODE)
+                    .resultMessage(CodeConst.MEMBER_NOT_FOUND_MESSAGE)
+                    .build();
+        }
+
         PostStatusType statusType = saveRequest.getType().getPostType().equals("NOTICE") ?
                 POSTED : WAITING;
 
         postRepository.save(Post.builder()
-                        .author(saveRequest.getAuthor())
                         .content(saveRequest.getContent())
                         .title(saveRequest.getTitle())
                         .postType(saveRequest.getType())
                         .statusType(statusType)
+                        .author(member.getNickname())
                         .build()
         );
 
@@ -50,18 +59,25 @@ public class PostService {
     }
 
     public CommonResponse saveReply(ReplySaveRequest saveRequest) {
+        Member member = customMemberRepository.findMemberByNickname(saveRequest.getAuthor());
         Post post = postRepository.findById(saveRequest.getPostId())
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 글 입니다."));
+
+        if(Objects.isNull(member)) {
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.MEMBER_NOT_FOUND_CODE)
+                    .resultMessage(CodeConst.MEMBER_NOT_FOUND_MESSAGE)
+                    .build();
+        }
 
         post.updateStatusType(COMPLETE);
 
         replyRepository.save(Reply.builder()
-                        .author(saveRequest.getAuthor())
                         .content(saveRequest.getContent())
                         .title(saveRequest.getTitle())
+                        .author(member.getNickname())
                         .post(post)
-                        .build()
-        );
+                        .build());
 
         return CommonResponse.builder()
                 .resultCode(CodeConst.SUCCESS_CODE)
