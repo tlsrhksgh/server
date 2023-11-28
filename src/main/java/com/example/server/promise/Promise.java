@@ -1,14 +1,10 @@
 package com.example.server.promise;
 
-import com.example.server.member.Authority;
+import com.example.server.common.entity.BaseTimeEntity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,9 +14,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EntityListeners(AuditingEntityListener
-        .class)
-public class Promise {
+public class Promise extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,12 +35,6 @@ public class Promise {
     private String memo;
 
     private String completed;
-
-    @CreatedDate
-    private LocalDateTime createdDate;
-
-    @LastModifiedDate
-    private LocalDateTime modifiedDate;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "promise", cascade = CascadeType.ALL)

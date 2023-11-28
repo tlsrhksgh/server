@@ -41,9 +41,7 @@ public class MemberService {
                 .build();
     }
 
-
     // 닉네임, 패스워드, 이미지 변경
-    @Transactional
     public CommonResponse updateMember(Map<String, String> request, Authentication authentication) {
         Member member = customMemberRepository.findMemberByAccount(authentication.getName());
 
@@ -58,7 +56,8 @@ public class MemberService {
             request.put("password", passwordEncoder.encode(request.get("password")));
         }
 
-        member.update(request);
+        String oldNickname = member.getNickname();
+        customMemberRepository.updateMember(request, oldNickname);
 
         return CommonResponse.builder()
                 .resultCode(CodeConst.SUCCESS_CODE)

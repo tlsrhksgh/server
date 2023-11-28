@@ -2,6 +2,7 @@ package com.example.server.common.entity;
 
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -21,7 +22,7 @@ public class BaseTimeEntity {
     private LocalDateTime createdDate;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    @CreatedDate
+    @LastModifiedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime modifiedDate;
 }

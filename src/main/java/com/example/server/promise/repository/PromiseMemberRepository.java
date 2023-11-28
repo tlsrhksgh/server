@@ -1,6 +1,5 @@
 package com.example.server.promise.repository;
 
-import com.example.server.member.Member;
 import com.example.server.member.MemberInterface;
 import com.example.server.promise.PromiseMember;
 import org.springframework.data.jpa.repository.JpaRepository;

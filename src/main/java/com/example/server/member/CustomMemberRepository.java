@@ -5,30 +5,43 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-import static com.example.server.member.QMember.member;
 import static com.example.server.member.QAuthority.authority;
+import static com.example.server.member.QMember.member;
 
 @Repository
 public class CustomMemberRepository extends QuerydslRepositorySupport {
     private final JPAQueryFactory queryFactory;
-    private final EntityManager entityManager;
+    private final JdbcTemplate jdbcTemplate;
 
-    public CustomMemberRepository(JPAQueryFactory queryFactory, EntityManager entityManager) {
+    public CustomMemberRepository(JPAQueryFactory queryFactory, JdbcTemplate jdbcTemplate) {
         super(Member.class);
         this.queryFactory = queryFactory;
-        this.entityManager = entityManager;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Transactional
     public Member findMemberByAccount(String account) {
         return queryFactory
                 .selectFrom(member)
                 .where(member.account.eq(account))
+                .leftJoin(member.roles, authority)
+                .fetchJoin()
+                .fetchOne();
+    }
+
+
+    public Member findMemberByNickname(String nickname) {
+        return queryFactory
+                .selectFrom(member)
+                .where(member.nickname.eq(nickname))
                 .leftJoin(member.roles, authority)
                 .fetchJoin()
                 .fetchOne();
@@ -45,19 +58,45 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
                 .fetch();
     }
 
+    @Modifying(clearAutomatically = true)
+    public void updateMember(Map<String, String> request, String oldNickname) {
+        String newNickname = request.get("nickname") == null ?
+                String.valueOf(member.nickname) : request.get("nickname");
+
+        String newPassword = request.get("password") == null ?
+                String.valueOf(member.password) : request.get("password");
+
+        String newImg = request.get("img") == null ? String.valueOf(member.img) : request.get("img");
+
+        String nativeQuery = "UPDATE Member m " +
+                "JOIN Friend f ON m.nickname = f.requester OR m.nickname = f.respondent " +
+                "JOIN Post po ON m.nickname = po.author " +
+                "JOIN Promise pr ON m.nickname = pr.leader " +
+                "JOIN PromiseMember pm ON pm.promise_id = pr.id " +
+                "SET m.nickname = ?, m.password = ?, m.img = ?," +
+                "    f.requester = CASE WHEN f.requester = ? THEN ? ELSE f.requester END, " +
+                "    f.respondent = CASE WHEN f.respondent = ? THEN ? ELSE f.respondent END, " +
+                "    po.author = CASE WHEN po.author = ? THEN ? ELSE po.author END, " +
+                "    pr.leader = CASE WHEN pr.leader = ? THEN ? ELSE pr.leader END, " +
+                "    pm.nickname = CASE WHEN pm.nickname = ? THEN ? ELSE pm.nickname END " +
+                "    WHERE m.nickname = ?";
+
+        jdbcTemplate.update(nativeQuery,
+                newNickname, newPassword, newImg,
+                oldNickname, newNickname,
+                oldNickname, newNickname,
+                oldNickname, newNickname,
+                oldNickname, newNickname,
+                oldNickname, newNickname,
+                oldNickname
+       );
+    }
+
     private BooleanExpression inEqMemberAccount(String user1, String user2) {
         if (Objects.isNull(user1) || Objects.isNull(user2)) {
             return null;
         }
 
         return member.account.in(user1, user2);
-    }
-
-    public long updateUserImage(String image, String account) {
-        return queryFactory
-                .update(member)
-                .set(member.img, image)
-                .where(member.account.eq(account))
-                .execute();
     }
 }
