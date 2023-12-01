@@ -59,7 +59,7 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
     }
 
     @Modifying(clearAutomatically = true)
-    public void updateMemberWithOrderEntities(Map<String, String> request, Member member) {
+    public void updateMemberWithRelatedEntities(Map<String, String> request, Member member) {
         String oldNickname = member.getNickname();
 
         String newNickname = request.get("nickname") == null ?
@@ -70,21 +70,18 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
 
         String newImg = request.get("img") == null ? member.getImg() : request.get("img");
 
-        String memberUpdateQuery = "UPDATE Member m " +
-                "SET m.nickname = ?, m.password = ?, m.img = ? " +
-                "WHERE m.memberId = ?";
-
         String memberRelatedEntitiesUpdateQuery = "UPDATE Member m " +
-                "JOIN Friend f ON m.nickname = f.requester OR m.nickname = f.respondent " +
-                "JOIN Post po ON m.nickname = po.author " +
-                "JOIN Promise pr ON m.nickname = pr.leader " +
-                "JOIN PromiseMember pm ON pm.promise_id = pr.id " +
+                "LEFT JOIN Friend f ON m.nickname = f.requester OR m.nickname = f.respondent " +
+                "LEFT JOIN Post po ON m.nickname = po.author " +
+                "LEFT JOIN Promise pr ON m.nickname = pr.leader " +
+                "LEFT JOIN PromiseMember pm ON m.nickname = pm.nickname " +
                 "SET " +
                 "    f.requester = CASE WHEN f.requester = ? THEN ? ELSE f.requester END, " +
                 "    f.respondent = CASE WHEN f.respondent = ? THEN ? ELSE f.respondent END, " +
                 "    po.author = CASE WHEN po.author = ? THEN ? ELSE po.author END, " +
                 "    pr.leader = CASE WHEN pr.leader = ? THEN ? ELSE pr.leader END, " +
-                "    pm.nickname = CASE WHEN pm.nickname = ? THEN ? ELSE pm.nickname END " +
+                "    pm.nickname = CASE WHEN pm.nickname = ? THEN ? ELSE pm.nickname END, " +
+                "    m.nickname = ?, m.password = ?, m.img = ? " +
                 "    WHERE m.memberId = ?";
 
         jdbcTemplate.update(memberRelatedEntitiesUpdateQuery,
@@ -93,10 +90,10 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
                 oldNickname, newNickname,
                 oldNickname, newNickname,
                 oldNickname, newNickname,
+                newNickname, newPassword, newImg,
                 member.getMemberId());
-        jdbcTemplate.update(memberUpdateQuery, newNickname, newPassword, newImg, member.getMemberId());
-
     }
+
 
     private BooleanExpression inEqMemberAccount(String user1, String user2) {
         if (Objects.isNull(user1) || Objects.isNull(user2)) {

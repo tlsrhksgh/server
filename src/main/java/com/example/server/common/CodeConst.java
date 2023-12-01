@@ -11,11 +11,11 @@ public class CodeConst {
     public static final String MEMBER_NOT_FOUND_MESSAGE = "MEMBER NOT FOUND";
 
     // 계정 중복
-    public static final String DUPLICATED_ACCOUNT_CODE = "410";
+    public static final String DUPLICATED_ACCOUNT_CODE = "409";
     public static final String DUPLICATED_ACCOUNT_MESSAGE = "DUPLICATED ACCOUNT";
 
     // 닉네임 중복
-    public static final String DUPLICATED_NICKNAME_CODE = "411";
+    public static final String DUPLICATED_NICKNAME_CODE = "409";
     public static final String DUPLICATED_NICKNAME_MESSAGE = "DUPLICATED NICKNAME";
 
     // 이미지 변경 실패
