@@ -3,7 +3,6 @@ package com.example.server.member;
 import com.example.server.common.CommonResponse;
 import com.example.server.member.dto.SignRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +23,7 @@ public class SignController {
         return ResponseEntity.ok(signService.register(request));
     }
 
-    @PostMapping(value = "/oauth")
+    @PostMapping(value = "/login/oauth")
     public ResponseEntity<CommonResponse> oAuthSignInOrSignUp(@RequestBody SignRequest request) throws Exception {
         return ResponseEntity.ok(signService.register(request));
     }

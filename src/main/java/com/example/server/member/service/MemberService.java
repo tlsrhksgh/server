@@ -42,6 +42,7 @@ public class MemberService {
     }
 
     // 닉네임, 패스워드, 이미지 변경
+    @Transactional
     public CommonResponse updateMember(Map<String, String> request, Authentication authentication) {
         Member member = customMemberRepository.findMemberByAccount(authentication.getName());
 
@@ -52,11 +53,21 @@ public class MemberService {
                     .build();
         }
 
+        if(Objects.nonNull(request.get("nickname"))) {
+            boolean isExistMember = memberRepository.existsByNickname(request.get("nickname"));
+            if(isExistMember) {
+                return CommonResponse.builder()
+                        .resultCode(CodeConst.DUPLICATED_NICKNAME_CODE)
+                        .resultMessage(CodeConst.DUPLICATED_NICKNAME_MESSAGE)
+                        .build();
+            }
+        }
+
         if(Objects.nonNull(request.get("password"))) {
             request.put("password", passwordEncoder.encode(request.get("password")));
         }
 
-        customMemberRepository.updateMemberWithOrderEntities(request, member);
+        customMemberRepository.updateMemberWithRelatedEntities(request, member);
 
         return CommonResponse.builder()
                 .resultCode(CodeConst.SUCCESS_CODE)

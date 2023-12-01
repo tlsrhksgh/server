@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.*;
@@ -27,6 +25,7 @@ public class Member {
 
     private String password;
 
+    @Column(unique = true)
     private String nickname;
 
     private Integer level;
@@ -46,11 +45,5 @@ public class Member {
     public void setRoles(List<Authority> roles) {
         this.roles = roles;
         roles.forEach(o -> o.setMember(this));
-    }
-
-    public void update(Map<String, String> request) {
-        this.nickname = Objects.isNull(request.get("nickname")) ? nickname : request.get("nickname");
-        this.img = Objects.isNull(request.get("img")) ? img : request.get("img");
-        this.password = Objects.isNull(request.get("password")) ? password : request.get("password");
     }
 }
