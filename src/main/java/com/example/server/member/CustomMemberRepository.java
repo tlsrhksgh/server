@@ -16,6 +16,7 @@ import java.util.Objects;
 import static com.example.server.member.QAuthority.authority;
 import static com.example.server.member.QMember.member;
 
+@Transactional
 @Repository
 public class CustomMemberRepository extends QuerydslRepositorySupport {
     private final JPAQueryFactory queryFactory;
@@ -27,7 +28,6 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Transactional
     public Member findMemberByAccount(String account) {
         return queryFactory
                 .selectFrom(member)
@@ -59,37 +59,43 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
     }
 
     @Modifying(clearAutomatically = true)
-    public void updateMember(Map<String, String> request, String oldNickname) {
+    public void updateMemberWithOrderEntities(Map<String, String> request, Member member) {
+        String oldNickname = member.getNickname();
+
         String newNickname = request.get("nickname") == null ?
-                String.valueOf(member.nickname) : request.get("nickname");
+                oldNickname : request.get("nickname");
 
         String newPassword = request.get("password") == null ?
-                String.valueOf(member.password) : request.get("password");
+                member.getPassword() : request.get("password");
 
-        String newImg = request.get("img") == null ? String.valueOf(member.img) : request.get("img");
+        String newImg = request.get("img") == null ? member.getImg() : request.get("img");
 
-        String nativeQuery = "UPDATE Member m " +
+        String memberUpdateQuery = "UPDATE Member m " +
+                "SET m.nickname = ?, m.password = ?, m.img = ? " +
+                "WHERE m.memberId = ?";
+
+        String memberRelatedEntitiesUpdateQuery = "UPDATE Member m " +
                 "JOIN Friend f ON m.nickname = f.requester OR m.nickname = f.respondent " +
                 "JOIN Post po ON m.nickname = po.author " +
                 "JOIN Promise pr ON m.nickname = pr.leader " +
                 "JOIN PromiseMember pm ON pm.promise_id = pr.id " +
-                "SET m.nickname = ?, m.password = ?, m.img = ?," +
+                "SET " +
                 "    f.requester = CASE WHEN f.requester = ? THEN ? ELSE f.requester END, " +
                 "    f.respondent = CASE WHEN f.respondent = ? THEN ? ELSE f.respondent END, " +
                 "    po.author = CASE WHEN po.author = ? THEN ? ELSE po.author END, " +
                 "    pr.leader = CASE WHEN pr.leader = ? THEN ? ELSE pr.leader END, " +
                 "    pm.nickname = CASE WHEN pm.nickname = ? THEN ? ELSE pm.nickname END " +
-                "    WHERE m.nickname = ?";
+                "    WHERE m.memberId = ?";
 
-        jdbcTemplate.update(nativeQuery,
-                newNickname, newPassword, newImg,
+        jdbcTemplate.update(memberRelatedEntitiesUpdateQuery,
                 oldNickname, newNickname,
                 oldNickname, newNickname,
                 oldNickname, newNickname,
                 oldNickname, newNickname,
                 oldNickname, newNickname,
-                oldNickname
-       );
+                member.getMemberId());
+        jdbcTemplate.update(memberUpdateQuery, newNickname, newPassword, newImg, member.getMemberId());
+
     }
 
     private BooleanExpression inEqMemberAccount(String user1, String user2) {

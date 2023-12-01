@@ -56,8 +56,7 @@ public class MemberService {
             request.put("password", passwordEncoder.encode(request.get("password")));
         }
 
-        String oldNickname = member.getNickname();
-        customMemberRepository.updateMember(request, oldNickname);
+        customMemberRepository.updateMemberWithOrderEntities(request, member);
 
         return CommonResponse.builder()
                 .resultCode(CodeConst.SUCCESS_CODE)

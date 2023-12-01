@@ -30,7 +30,6 @@ public class SignService {
 
     // 로그인
     public CommonResponse login(SignRequest request) throws Exception {
-
         Member member = memberRepository.findByAccount(request.getAccount()).orElseThrow(() ->
                 new BadCredentialsException("잘못된 계정정보입니다."));
 
