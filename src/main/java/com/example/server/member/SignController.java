@@ -16,22 +16,27 @@ public class SignController {
 
     @PostMapping(value = "/login")
     public ResponseEntity<CommonResponse> signin(@RequestBody SignRequest request) throws Exception {
-        return new ResponseEntity<>(signService.login(request), HttpStatus.OK);
+        return ResponseEntity.ok(signService.login(request));
     }
 
     @PostMapping(value = "/register")
     public ResponseEntity<CommonResponse> signup(@RequestBody SignRequest request) throws Exception {
-        return new ResponseEntity<>(signService.register(request), HttpStatus.OK);
+        return ResponseEntity.ok(signService.register(request));
+    }
+
+    @PostMapping(value = "/oauth")
+    public ResponseEntity<CommonResponse> oAuthSignInOrSignUp(@RequestBody SignRequest request) throws Exception {
+        return ResponseEntity.ok(signService.register(request));
     }
 
     @GetMapping("/{account}/exists/account")
     public ResponseEntity<CommonResponse> checkAccountDuplicate(@PathVariable String account) {
-        return new ResponseEntity<>(signService.checkAccountDuplicate(account), HttpStatus.OK);
+        return ResponseEntity.ok(signService.checkAccountDuplicate(account));
     }
 
     @GetMapping("/{nickname}/exists/nickname")
     public ResponseEntity<CommonResponse> checkNickNameDuplicate(@PathVariable String nickname) {
-        return new ResponseEntity<>(signService.checkNickNameDuplicate(nickname), HttpStatus.OK);
+        return ResponseEntity.ok(signService.checkNickNameDuplicate(nickname));
     }
 
     @PostMapping("/verify-code")
