@@ -1,7 +1,6 @@
 package com.example.server.member;
 
-import com.example.server.chat.service.dto.CreateRoomForm;
-import com.querydsl.core.types.dsl.BooleanExpression;
+import com.example.server.promise.PromiseMember;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -11,12 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static com.example.server.member.QAuthority.authority;
 import static com.example.server.member.QMember.member;
+import static com.example.server.promise.QPromiseMember.promiseMember;
 
-@Transactional
+
 @Repository
 public class CustomMemberRepository extends QuerydslRepositorySupport {
     private final JPAQueryFactory queryFactory;
@@ -28,6 +27,7 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Transactional(readOnly = true)
     public Member findMemberByAccount(String account) {
         return queryFactory
                 .selectFrom(member)
@@ -37,7 +37,7 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
                 .fetchOne();
     }
 
-
+    @Transactional(readOnly = true)
     public Member findMemberByNickname(String nickname) {
         return queryFactory
                 .selectFrom(member)
@@ -47,17 +47,24 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
                 .fetchOne();
     }
 
-    public List<Member> findTwoMember(CreateRoomForm form) {
+    @Transactional(readOnly = true)
+    public List<PromiseMember> findAllParticipatedPromiseByNickname(String nickname) {
+        return queryFactory
+                .selectFrom(promiseMember)
+                .where(promiseMember.nickname.in(nickname))
+                .fetch();
+    }
+
+    public List<Member> findMembersByNicknames(List<String> nicknames) {
         return queryFactory
                 .selectFrom(member)
-                .where(
-                        inEqMemberAccount(form.getSender(), form.getReceiver())
-                )
-                .leftJoin(member.roles, authority)
+                .where(member.nickname.in(nicknames))
+                .innerJoin(member.roles, authority)
                 .fetchJoin()
                 .fetch();
     }
 
+    @Transactional
     @Modifying(clearAutomatically = true)
     public void updateMemberWithRelatedEntities(Map<String, String> request, Member member) {
         String oldNickname = member.getNickname();
@@ -92,14 +99,5 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
                 oldNickname, newNickname,
                 newNickname, newPassword, newImg,
                 member.getMemberId());
-    }
-
-
-    private BooleanExpression inEqMemberAccount(String user1, String user2) {
-        if (Objects.isNull(user1) || Objects.isNull(user2)) {
-            return null;
-        }
-
-        return member.account.in(user1, user2);
     }
 }

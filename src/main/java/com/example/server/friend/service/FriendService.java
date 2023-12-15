@@ -9,11 +9,12 @@ import com.example.server.friend.repository.FriendRepository;
 import com.example.server.member.CustomMemberRepository;
 import com.example.server.member.Member;
 import com.example.server.member.MemberRepository;
+import com.example.server.push.contatns.PushCategory;
+import com.example.server.push.service.PushService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ public class FriendService {
     private final FriendRepository friendRepository;
     private final MemberRepository memberRepository;
     private final CustomMemberRepository customMemberRepository;
+    private final PushService pushService;
 
     // 친구 추가 요청
     public CommonResponse addRequest(FriendRequestDto request, Authentication authentication) throws Exception {
@@ -58,6 +60,10 @@ public class FriendService {
                 friend.setRespondent(request.getRespondent());
                 friend.setAccepted("N");
                 friendRepository.save(friend);
+
+                Member member = customMemberRepository.findMemberByNickname(request.getRespondent());
+                pushService.makeAndSendPushNotification(PushCategory.FRIEND_REQUEST, member.getAccount());
+
                 log.info("FriendService - addRequest : SUCCESS");
                 return CommonResponse.builder()
                         .resultCode(CodeConst.SUCCESS_CODE)

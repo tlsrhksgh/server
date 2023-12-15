@@ -2,12 +2,14 @@ package com.example.server.member;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
+import com.example.server.common.client.RedisClient;
 import com.example.server.member.component.MailComponent;
 import com.example.server.member.dto.SignRequest;
 import com.example.server.security.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,15 +29,19 @@ public class SignService {
     private final JwtProvider jwtProvider;
     private final MailComponent mailComponent;
     private final ObjectMapper mapper;
+    private final RedisClient redisClient;
 
     // 로그인
-    public CommonResponse login(SignRequest request) throws Exception {
+    public CommonResponse login(SignRequest request) {
         Member member = memberRepository.findByAccount(request.getAccount()).orElseThrow(() ->
                 new BadCredentialsException("잘못된 계정정보입니다."));
 
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
             throw new BadCredentialsException("잘못된 계정정보입니다.");
         }
+
+        log.info("login device token: {}", request.getDeviceToken());
+        redisClient.deviceTokenPut(request.getAccount(), request.getDeviceToken());
 
         Map<String, Object> resultMap = new HashMap<>();
         Map<String, Object> userInfo = mapper.convertValue(member, Map.class);
@@ -87,38 +93,6 @@ public class SignService {
             log.error("SignService - register Error: {}", e.getMessage());
             throw new Exception("잘못된 요청입니다.");
         }
-    }
-
-    public CommonResponse oAuthRegisterOrLogin(SignRequest request) {
-        Member optionalMember = memberRepository.findByAccount(request.getAccount())
-                .orElse(null);
-
-        if(Objects.isNull(optionalMember)) {
-            Member member = Member.builder()
-                    .account(request.getAccount())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .nickname(request.getNickname())
-                    .level(1)
-                    .exp(0)
-                    .img(request.getImg())
-                    .roles(Collections.singletonList(Authority.builder().name("ROLE_USER").build()))
-                    .build();
-
-            member.setRoles(Collections.singletonList(Authority.builder().name("ROLE_USER").build()));
-            optionalMember = memberRepository.save(member);
-        }
-
-        Member member = optionalMember;
-        Map<String, Object> resultMap = new HashMap<>();
-        Map<String, Object> userInfo = mapper.convertValue(member, Map.class);
-        userInfo.remove("password");
-        resultMap.put("userInfo", userInfo);
-        resultMap.put("token", jwtProvider.createToken(member.getAccount(), member.getRoles()));
-        return CommonResponse.builder()
-                .resultCode(CodeConst.SUCCESS_CODE)
-                .resultMessage(CodeConst.SUCCESS_MESSAGE)
-                .data(resultMap)
-                .build();
     }
 
     public CommonResponse sendVerifyCode(String account) {

@@ -1,12 +1,16 @@
 package com.example.server.chat.domain.model.entity;
 
-import com.example.server.common.entity.BaseTimeEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.persistence.*;
 
+@Getter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Entity
-public class ChatMessage extends BaseTimeEntity {
-
+public class ChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -14,7 +18,10 @@ public class ChatMessage extends BaseTimeEntity {
     private String author;
     private String message;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "chatroom_id")
     private ChatRoom chatRoom;
+
+    private String sentDate;
 }

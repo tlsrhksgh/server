@@ -1,52 +1,16 @@
 package com.example.server.chat.service;
 
-import com.example.server.chat.domain.repository.dto.ChatRoomListResponse;
-import com.example.server.chat.domain.model.entity.ChatRoom;
-import com.example.server.chat.domain.model.entity.MemberChatRoom;
-import com.example.server.chat.domain.repository.ChatRoomRepository;
-import com.example.server.chat.domain.repository.MemberChatRoomRepository;
-import com.example.server.chat.domain.repository.custom.CustomMemberChatRoomRepository;
-import com.example.server.chat.service.dto.CreateRoomForm;
-import com.example.server.member.CustomMemberRepository;
+import com.example.server.chat.constants.DeleteRoomType;
+import com.example.server.common.CommonResponse;
 import com.example.server.member.Member;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.example.server.promise.Promise;
 
-import java.util.Arrays;
 import java.util.List;
 
-@RequiredArgsConstructor
-@Service
-public class ChatRoomService {
-    private final ChatRoomRepository chatRoomRepository;
-    private final MemberChatRoomRepository memberChatRoomRepository;
-    private final CustomMemberRepository customMemberRepository;
-    private final CustomMemberChatRoomRepository customMemberChatRoomRepository;
-
-    @Transactional
-    public Long createRoom(CreateRoomForm form) {
-        ChatRoom room = new ChatRoom();
-
-        chatRoomRepository.save(room);
-
-        List<Member> members = customMemberRepository.findTwoMember(form);
-
-        if(members.size() <= 1) {
-            throw new RuntimeException("초대하려는 사용자가 존재하지 않습니다.");
-        }
-
-        List<MemberChatRoom> memberChatRooms = Arrays.asList(
-                MemberChatRoom.builder().member(members.get(0)).chatRoom(room).build(),
-                MemberChatRoom.builder().member(members.get(1)).chatRoom(room).build()
-        );
-
-        memberChatRoomRepository.saveAll(memberChatRooms);
-
-        return room.getId();
-    }
-
-    public List<ChatRoomListResponse> findAllChatRoom(String account) {
-        return customMemberChatRoomRepository.findAllChatRoom(account);
-    }
+public interface ChatRoomService {
+    void createChatRoom(Promise promise, List<Member> currentUser);
+    void deleteChatroom(Long roomId, Member member, DeleteRoomType type);
+    void inviteMembersToChatRoom(Long roomId, String memberNickname);
+    CommonResponse findChatRoomDetail(Long roomId, String account);
+    public CommonResponse findAllChatRoom(String account);
 }

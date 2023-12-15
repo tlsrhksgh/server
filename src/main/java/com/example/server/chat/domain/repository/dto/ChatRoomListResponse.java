@@ -3,20 +3,20 @@ package com.example.server.chat.domain.repository.dto;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 @Getter
 public class ChatRoomListResponse {
+    private Long roomId;
     private String title;
-    private int total;
-    private String lastMessage;
-    private LocalDateTime lastSendDate;
+    private Long totalMember;
+    private String promiseDate;
+    private String lastSendDate;
 
     @QueryProjection
-    public ChatRoomListResponse(String title, int total, String lastMessage, LocalDateTime lastSendDate) {
+    public ChatRoomListResponse(Long roomId, String title, Long totalMember, String promiseDate, String lastSendDate) {
+        this.roomId = roomId;
         this.title = title;
-        this.total = total;
-        this.lastMessage = lastMessage;
+        this.totalMember = totalMember;
+        this.promiseDate = promiseDate;
         this.lastSendDate = lastSendDate;
     }
 }

@@ -1,8 +1,8 @@
 package com.example.server.chat.domain.model.entity;
 
 import com.example.server.common.entity.BaseTimeEntity;
-import lombok.Getter;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -10,8 +10,10 @@ import java.util.List;
 import java.util.Set;
 
 @Getter
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 public class ChatRoom extends BaseTimeEntity {
 
     @Id
@@ -20,11 +22,11 @@ public class ChatRoom extends BaseTimeEntity {
 
     private String title;
 
-    private int total;
+    @Column(updatable = false, unique = true)
+    private Long promiseId;
 
-    private String lastMessage;
-
-    @OneToMany(mappedBy = "chatRoom")
+    @JsonIgnore
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ChatMessage> messages;
 
     @OneToMany(mappedBy = "chatRoom")
