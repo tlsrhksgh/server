@@ -5,6 +5,7 @@ import com.example.server.promise.dto.PromiseInterface;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -18,6 +19,9 @@ public interface PromiseRepository extends JpaRepository<Promise, Long> {
             "SELECT promise_id FROM PromiseMember WHERE nickname = ?1 AND accepted = 'Y') AND date BETWEEN ?2 AND ?3 AND completed = ?4"
             , nativeQuery = true)
     List<PromiseInterface> selectPromiseList(String nickname, String start, String end, String completed) throws Exception;
+
+    @Query("SELECT p.leader FROM Promise p WHERE p.id = :promiseId")
+    String findLeaderByPromiseId(@Param("promiseId") Long promiseId);
 
     @Query(value = "SELECT id, date, location, memo, leader, penalty, title " +
             "FROM Promise " +

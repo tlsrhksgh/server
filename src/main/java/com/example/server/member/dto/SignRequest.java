@@ -15,6 +15,8 @@ public class SignRequest {
 
     private String nickname;
 
+    private String deviceToken;
+
     private String img;
 
 }

@@ -1,6 +1,7 @@
 package com.example.server.member;
 
 import com.example.server.chat.domain.model.entity.MemberChatRoom;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,7 +40,8 @@ public class Member {
     @Builder.Default
     private List<Authority> roles = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member")
+    @JsonIgnore
+    @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<MemberChatRoom> memberChatRooms = new HashSet<>();
 
     public void setRoles(List<Authority> roles) {

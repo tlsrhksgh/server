@@ -5,6 +5,9 @@ import com.example.server.common.CommonResponse;
 import com.example.server.member.CustomMemberRepository;
 import com.example.server.member.Member;
 import com.example.server.member.MemberRepository;
+import com.example.server.promise.Promise;
+import com.example.server.promise.PromiseMember;
+import com.example.server.promise.service.PromiseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -25,6 +29,7 @@ public class MemberService {
     private final CustomMemberRepository customMemberRepository;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PromiseService promiseService;
 
     public CommonResponse getInfo(Authentication authentication) throws Exception {
         Member member = customMemberRepository.findMemberByAccount(authentication.getName());
@@ -75,13 +80,28 @@ public class MemberService {
                 .build();
     }
 
+    @Transactional
     public CommonResponse deleteMember(Authentication authentication) {
         Member member = customMemberRepository.findMemberByAccount(authentication.getName());
-        memberRepository.delete(member);
+
+        if(Objects.nonNull(member)) {
+            List<PromiseMember> promiseMembers = customMemberRepository.
+                    findAllParticipatedPromiseByNickname(member.getNickname());
+
+            for(PromiseMember promiseMember : promiseMembers) {
+                promiseService.exitPromise(String.valueOf(promiseMember.getPromise().getId()), authentication);
+            }
+            memberRepository.delete(member);
+
+            return CommonResponse.builder()
+                    .resultMessage(CodeConst.SUCCESS_CODE)
+                    .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                    .build();
+        }
 
         return CommonResponse.builder()
-                .resultMessage(CodeConst.SUCCESS_CODE)
-                .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                .resultCode(CodeConst.MEMBER_NOT_FOUND_CODE)
+                .resultMessage(CodeConst.MEMBER_NOT_FOUND_MESSAGE)
                 .build();
     }
 }

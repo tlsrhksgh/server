@@ -3,14 +3,14 @@ spring:
     allow-bean-definition-overriding: true
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: admin
-    password: qwer1234
-    url: jdbc:mysql://server-database.c2sms6rorlmj.ap-northeast-2.rds.amazonaws.com:3306/toydb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username:
+    password:
+    url:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: gmail-id
-    password: gmail-password
+    username:
+    password:
     properties:
       mail:
         smtp:
@@ -29,14 +29,12 @@ spring:
       hibernate:
         default_batch_fetch_size: 1000
     hibernate:
-      ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   profiles:
-    active: db
+    active: db, apns
 
 # jwt.secret.key? ?? 256bit ????? ???.
 jwt:
   secret:
     key: x!A%D*G-KaPdSgVkYp3s5v8y/B?E(H+M
-

@@ -16,7 +16,6 @@ import com.example.server.post.service.dto.PostSaveRequest;
 import com.example.server.post.service.dto.ReplySaveRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -85,7 +84,6 @@ public class PostService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
     public CommonResponse findInquiryWithReplyList(String account, String statusType, Integer period) {
         Member member = customMemberRepository.findMemberByAccount(account);
 
@@ -106,7 +104,6 @@ public class PostService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
     public CommonResponse findAllTypeNotice() {
         List<AllNoticeResponse> responses = customPostRepository.findAllNotice();
 

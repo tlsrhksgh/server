@@ -1,5 +1,8 @@
 package com.example.server.promise.service;
 
+import com.example.server.chat.service.ChatRoomService;
+import com.example.server.push.contatns.PushCategory;
+import com.example.server.push.service.PushService;
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
 import com.example.server.member.CustomMemberRepository;
@@ -15,13 +18,14 @@ import com.example.server.promise.repository.PromiseRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.apache.bcel.classfile.Code;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+
+import static com.example.server.chat.constants.DeleteRoomType.DELETE;
+import static com.example.server.chat.constants.DeleteRoomType.EXIT;
 
 @Service
 @Slf4j
@@ -33,10 +37,13 @@ public class PromiseService {
     private final PromiseMemberRepository promiseMemberRepository;
     private final CustomMemberRepository customMemberRepository;
     private final MemberRepository memberRepository;
+    private final ChatRoomService chatRoomService;
+    private final PushService pushService;
 
     // 약속 생성
     public CommonResponse createPromise(HashMap<String, Object> request, Authentication authentication) throws Exception {
         log.info("PromiseService - createPromise : START");
+        List<String> memberNicknames = new ArrayList<>();
         Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -45,16 +52,25 @@ public class PromiseService {
             promise.setCompleted("N");
             List<Map<String, String>> members = mapper.convertValue(request.get("members"), List.class);
             List<PromiseMember> promiseMembers = new ArrayList<>();
+
+            List<Member> memberList = customMemberRepository.findMembersByNicknames(memberNicknames);
+
+            memberList.add(currentUser);
+
             promiseMembers.add(PromiseMember.builder().nickname(currentUser.getNickname()).accepted("Y").build());
             if (!members.isEmpty()) {
-                for (Map<String, String> member : members) {
-                    promiseMembers.add(PromiseMember.builder().nickname(member.get("nickname")).accepted("N").build());
+                for (Member member : memberList) {
+                    String nickname = member.getNickname();
+                    promiseMembers.add(PromiseMember.builder().nickname(nickname).accepted("N").build());
+                    memberNicknames.add(nickname);
+                    pushService.makeAndSendPushNotification(PushCategory.PROMISE_REQUEST, member.getAccount());
                 }
             }
             promise.setMembers(promiseMembers);
 
             Map<String, Object> resultMap = new HashMap<>();
             Promise promiseInfo = promiseRepository.save(promise);
+            chatRoomService.createChatRoom(promise, memberList);
             resultMap.put("info", promiseInfo);
             log.info("PromiseService - createPromise : SUCCESS");
             return CommonResponse.builder()
@@ -122,11 +138,12 @@ public class PromiseService {
 
     // 약속 탈퇴
     @Transactional
-    public CommonResponse exitPromise(Map<String, String> request, Authentication authentication) throws Exception {
+    public CommonResponse exitPromise(String promiseId, Authentication authentication) {
         log.info("PromiseService - exitPromise : START");
         Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
+        chatRoomService.deleteChatroom(Long.valueOf(promiseId), currentUser, EXIT);
         try {
-            Promise promise = promiseRepository.findPromiseById(Long.parseLong(request.get("promiseId")));
+            Promise promise = promiseRepository.findPromiseById(Long.parseLong(promiseId));
             if (Objects.isNull(promise)) {
                 log.error("PromiseService - exitPromise : FAIL");
                 return CommonResponse.builder()
@@ -136,7 +153,7 @@ public class PromiseService {
             }
             // 방장이 나갈 때
             if (currentUser.getNickname().equals(promise.getLeader())) {
-                List<MemberInterface> members = promiseMemberRepository.findAcceptedMembers(request.get("promiseId"));
+                List<MemberInterface> members = promiseMemberRepository.findAcceptedMembers(promiseId);
                 String curLeader = currentUser.getNickname();
                 String newLeader = "";
                 boolean isFind = false;
@@ -147,15 +164,17 @@ public class PromiseService {
                         break;
                     }
                 }
+
                 if (!isFind) {
-                    promiseMemberRepository.deletePromiseMembersByPromiseId(Long.parseLong(request.get("promiseId")));
-                    promiseRepository.deleteById(Long.parseLong(request.get("promiseId")));
+                    promiseMemberRepository.deletePromiseMembersByPromiseId(Long.parseLong(promiseId));
+                    promiseRepository.deleteById(Long.parseLong(promiseId));
                     return CommonResponse.builder()
                             .resultCode(CodeConst.SUCCESS_CODE)
                             .resultMessage(CodeConst.SUCCESS_MESSAGE)
                             .build();
                 }
-                if (promiseRepository.updateLeader(request.get("promiseId"), newLeader) == 1 && promiseMemberRepository.deletePromiseMemberByPromiseIdAndNickname(Long.parseLong(request.get("promiseId")), currentUser.getNickname()) == 1 ) {
+                if (promiseRepository.updateLeader(promiseId, newLeader) == 1 &&
+                        promiseMemberRepository.deletePromiseMemberByPromiseIdAndNickname(Long.parseLong(promiseId), currentUser.getNickname()) == 1 ) {
                     log.info("PromiseService - exitPromise : SUCCESS");
                     return CommonResponse.builder()
                             .resultCode(CodeConst.SUCCESS_CODE)
@@ -168,7 +187,7 @@ public class PromiseService {
                         .resultMessage(CodeConst.SUCCESS_MESSAGE)
                         .build();
             } else {
-                if (promiseMemberRepository.deletePromiseMemberByPromiseIdAndNickname(Long.parseLong(request.get("promiseId")), currentUser.getNickname()) == 1 ) {
+                if (promiseMemberRepository.deletePromiseMemberByPromiseIdAndNickname(Long.parseLong(promiseId), currentUser.getNickname()) == 1 ) {
                     log.info("PromiseService - exitPromise : SUCCESS");
                     return CommonResponse.builder()
                             .resultCode(CodeConst.SUCCESS_CODE)
@@ -185,7 +204,10 @@ public class PromiseService {
         } catch (Exception e) {
             log.error("PromiseService - exitPromise : Exception");
             e.printStackTrace();
-            throw new Exception(e);
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.PROMISE_EXIT_FAIL_CODE)
+                    .resultMessage(CodeConst.PROMISE_EXIT_FAIL_MESSAGE)
+                    .build();
         }
     }
 
@@ -193,8 +215,8 @@ public class PromiseService {
     public CommonResponse deletePromise(HashMap<String, String> request, Authentication authentication) throws Exception {
         log.info("PromiseService - deletePromise : START");
         Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
+        Promise promise = promiseRepository.findPromiseById(Long.parseLong(request.get("promiseId")));
         try {
-            Promise promise = promiseRepository.findPromiseById(Long.parseLong(request.get("promiseId")));
             if (Objects.isNull(promise)) {
                 log.error("PromiseService - deletePromise : FAIL");
                 return CommonResponse.builder()
@@ -205,6 +227,8 @@ public class PromiseService {
             if (currentUser.getNickname().equals(promise.getLeader())) {
                 promiseMemberRepository.deletePromiseMembersByPromiseId(Long.parseLong(request.get("promiseId")));
                 promiseRepository.deleteById(Long.parseLong(request.get("promiseId")));
+                chatRoomService.deleteChatroom(promise.getId(), currentUser, DELETE);
+
                 log.info("PromiseService - deletePromise : SUCCESS");
                 return CommonResponse.builder()
                         .resultCode(CodeConst.SUCCESS_CODE)
@@ -253,6 +277,7 @@ public class PromiseService {
         try {
             if (promiseMemberRepository.updateAcceptedY(request.getId(), currentUser.getNickname()) == 1) {
                 log.info("PromiseService - acceptPromiseRequest : SUCCESS");
+                chatRoomService.inviteMembersToChatRoom(Long.parseLong(request.getId()), currentUser.getNickname());
                 return CommonResponse.builder()
                         .resultCode(CodeConst.SUCCESS_CODE)
                         .resultMessage(CodeConst.SUCCESS_MESSAGE)
@@ -316,8 +341,12 @@ public class PromiseService {
                 } else {
                     Promise promise = promiseRepository.findById(mapper.convertValue(request.get("promiseId"), Long.class)).get();
                     PromiseMember friend = PromiseMember.builder().accepted("N").nickname(nickname).build();
+                    Member member = customMemberRepository.findMemberByNickname(nickname);
+
                     friend.setPromise(promise);
                     promise.getMembers().add(friend);
+                    pushService.makeAndSendPushNotification(PushCategory.PROMISE_REQUEST, member.getAccount());
+
                     promiseRepository.save(promise);
                 }
             }
@@ -358,18 +387,20 @@ public class PromiseService {
     // 약속 결과 처리 -- 방장만 하도록 추후 수정
     public CommonResponse result(Map<String, Object> request, Authentication authentication) throws Exception {
         log.info("PromiseService - result : START");
+        Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
 
-            String requestId = String.valueOf(request.get("promiseId"));
+            String promiseId = String.valueOf(request.get("promiseId"));
             ObjectMapper mapper = new ObjectMapper();
             List<Map<String, String>> result = mapper.convertValue(request.get("result"), List.class);
             for (Map<String, String> map : result) {
-                promiseMemberRepository.updateIsSucceed(requestId, map.get("nickname"), map.get("isSucceed"));
+                promiseMemberRepository.updateIsSucceed(promiseId, map.get("nickname"), map.get("isSucceed"));
                 if ("Y".equals(map.get("isSucceed"))) {
                     memberRepository.updateExp(map.get("nickname"));
                 }
             }
-            promiseRepository.updateCompleted(requestId);
+            promiseRepository.updateCompleted(promiseId);
+            chatRoomService.deleteChatroom(Long.valueOf(promiseId), currentUser, DELETE);
 
             return CommonResponse.builder()
                     .resultCode(CodeConst.SUCCESS_CODE)
