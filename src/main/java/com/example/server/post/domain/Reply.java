@@ -1,9 +1,16 @@
 package com.example.server.post.domain;
 
 import com.example.server.common.entity.BaseTimeEntity;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Entity
 public class Reply extends BaseTimeEntity {
 
@@ -11,8 +18,11 @@ public class Reply extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     private String author;
+
+    @Column(nullable = false)
+    private String title;
 
     @Column(nullable = false)
     private String content;

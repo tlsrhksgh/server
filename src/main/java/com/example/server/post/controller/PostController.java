@@ -1,41 +1,44 @@
 package com.example.server.post.controller;
 
-import com.example.server.post.domain.dto.AllNoticeResponse;
+import com.example.server.common.CommonResponse;
 import com.example.server.post.service.PostService;
+import com.example.server.post.service.dto.PostSaveRequest;
+import com.example.server.post.service.dto.ReplySaveRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RequiredArgsConstructor
+@RequestMapping("/post")
 @RestController
 public class PostController {
     private final PostService postService;
 
     @PostMapping("/inquiry")
-    public void saveInquiry() {
+    public ResponseEntity<CommonResponse> savePost(@RequestBody PostSaveRequest saveRequest) {
+        return ResponseEntity.ok(postService.savePost(saveRequest));
+    }
 
+    @PostMapping("/inquiry/reply")
+    public ResponseEntity<CommonResponse> saveReply(@RequestBody ReplySaveRequest saveRequest) {
+        return ResponseEntity.ok(postService.saveReply(saveRequest));
     }
 
     @GetMapping("/inquiry/list/{account}")
-    public void inquiryList(@PathVariable String account) {
+    public ResponseEntity<CommonResponse> inquiryReplyList(
+            @PathVariable String account,
+            @RequestParam(required = false) String statusType,
+            @RequestParam(required = false, defaultValue = "0") Integer period) {
+        if(period > 12) {
+            throw new RuntimeException("조회 기간을 초과하였습니다.");
+        }
 
-    }
-
-    @GetMapping("/inquiry/{id}")
-    public void inquiryDetail(@PathVariable Long id) {
-
+        return ResponseEntity.ok(postService.findInquiryWithReplyList(account, statusType, period));
     }
 
     @GetMapping("/notice/all")
-    public ResponseEntity<List<AllNoticeResponse>> findAllNotice() {
+    public ResponseEntity<CommonResponse> findAllNotice() {
         return ResponseEntity.ok(postService.findAllTypeNotice());
-    }
-
-    @GetMapping("/notice/find/{id}")
-    public ResponseEntity<String> noticeDetail(@PathVariable Long id,
-                                               @RequestParam("type") String type) {
-        return ResponseEntity.ok(postService.findNoticeContent(id, type));
     }
 }

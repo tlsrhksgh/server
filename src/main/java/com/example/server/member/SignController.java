@@ -3,9 +3,7 @@ package com.example.server.member;
 import com.example.server.common.CommonResponse;
 import com.example.server.member.dto.SignRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -13,39 +11,35 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 public class SignController {
-
-    private final SignService memberService;
+    private final SignService signService;
 
     @PostMapping(value = "/login")
     public ResponseEntity<CommonResponse> signin(@RequestBody SignRequest request) throws Exception {
-        return new ResponseEntity<>(memberService.login(request), HttpStatus.OK);
+        return ResponseEntity.ok(signService.login(request));
     }
 
     @PostMapping(value = "/register")
     public ResponseEntity<CommonResponse> signup(@RequestBody SignRequest request) throws Exception {
-        return new ResponseEntity<>(memberService.register(request), HttpStatus.OK);
+        return ResponseEntity.ok(signService.register(request));
+    }
+
+    @PostMapping(value = "/login/oauth")
+    public ResponseEntity<CommonResponse> oAuthSignInOrSignUp(@RequestBody SignRequest request) throws Exception {
+        return ResponseEntity.ok(signService.register(request));
     }
 
     @GetMapping("/{account}/exists/account")
     public ResponseEntity<CommonResponse> checkAccountDuplicate(@PathVariable String account) {
-        return new ResponseEntity<>(memberService.checkAccountDuplicate(account), HttpStatus.OK);
+        return ResponseEntity.ok(signService.checkAccountDuplicate(account));
     }
 
     @GetMapping("/{nickname}/exists/nickname")
     public ResponseEntity<CommonResponse> checkNickNameDuplicate(@PathVariable String nickname) {
-        return new ResponseEntity<>(memberService.checkNickNameDuplicate(nickname), HttpStatus.OK);
+        return ResponseEntity.ok(signService.checkNickNameDuplicate(nickname));
     }
 
-    @PostMapping("/user/update-profile")
-    public ResponseEntity<CommonResponse> updateUserInfo(
-            @RequestBody Map<String, String> request,
-            Authentication authentication) {
-        return ResponseEntity.ok(memberService.updateUser(request, authentication));
-    }
-
-    @DeleteMapping("/user/withdraw")
-    public ResponseEntity<Void> withdrawMember(Authentication authentication) {
-        memberService.deleteMember(authentication);
-        return ResponseEntity.ok().build();
+    @PostMapping("/verify-code")
+    public ResponseEntity<CommonResponse> checkVerifyCode(@RequestBody Map<String, String> request) {
+        return ResponseEntity.ok(signService.sendVerifyCode(request.get("account")));
     }
 }

@@ -20,11 +20,12 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long memberId;
 
-    @Column(unique = true)
+    @Column(unique = true, updatable = false)
     private String account;
 
     private String password;
 
+    @Column(unique = true)
     private String nickname;
 
     private Integer level;
@@ -34,7 +35,7 @@ public class Member {
     @Lob
     private String img;
 
-    @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Authority> roles = new ArrayList<>();
 
@@ -44,11 +45,5 @@ public class Member {
     public void setRoles(List<Authority> roles) {
         this.roles = roles;
         roles.forEach(o -> o.setMember(this));
-    }
-
-    public void update(Map<String, String> request) {
-        this.nickname = request.containsKey("nickname") ? request.get("nickname") : nickname;
-        this.img = request.containsKey("img") ? request.get("img") : img;
-        this.password = request.containsKey("password") ? request.get("password") : password;
     }
 }
