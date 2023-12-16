@@ -1,8 +1,10 @@
 package com.example.server.chat.domain.repository.custom;
 
 import com.example.server.chat.domain.model.entity.ChatRoom;
+import com.example.server.chat.domain.model.entity.MemberChatRoom;
 import com.example.server.chat.domain.repository.dto.ChatRoomListResponse;
 import com.example.server.chat.domain.repository.dto.QChatRoomListResponse;
+import com.example.server.member.Member;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -52,6 +54,17 @@ public class CustomMemberChatRoomRepository extends QuerydslRepositorySupport {
                         .and(promiseMember.accepted.eq("Y")))
                 .groupBy(memberChatRoom.chatRoom().id)
                 .orderBy(chatMessage.sentDate.max().desc())
+                .fetch();
+    }
+
+    @Transactional
+    public List<MemberChatRoom> findExistMemberInChatRoomByMemberId(List<Long> memberIds, Long roomId) {
+        return queryFactory
+                .selectFrom(memberChatRoom)
+                .where(
+                        memberChatRoom.member().memberId.in(memberIds)
+                                .and(memberChatRoom.chatRoom().id.eq(roomId))
+                )
                 .fetch();
     }
 

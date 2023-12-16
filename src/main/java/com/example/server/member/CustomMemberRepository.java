@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.example.server.member.QAuthority.authority;
 import static com.example.server.member.QMember.member;
@@ -75,7 +76,14 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
         String newPassword = request.get("password") == null ?
                 member.getPassword() : request.get("password");
 
-        String newImg = request.get("img") == null ? member.getImg() : request.get("img");
+        String newImg;
+        if(request.get("img").equals("")) {
+            newImg = null;
+        } else if(Objects.isNull(request.get("img"))) {
+            newImg = member.getImg();
+        } else {
+            newImg = request.get("img");
+        }
 
         String memberRelatedEntitiesUpdateQuery = "UPDATE Member m " +
                 "LEFT JOIN Friend f ON m.nickname = f.requester OR m.nickname = f.respondent " +

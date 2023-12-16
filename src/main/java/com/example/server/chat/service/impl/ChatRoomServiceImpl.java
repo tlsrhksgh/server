@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.example.server.chat.constants.DeleteRoomType.*;
 
@@ -46,6 +47,18 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         chatRoomRepository.save(room);
 
         List<MemberChatRoom> memberChatRooms = new ArrayList<>();
+
+        List<Long> memberIds = promiseMembers
+                .stream()
+                .map(Member::getMemberId)
+                .collect(Collectors.toList());
+
+        List<MemberChatRoom> isExistMembersInChatRoom = customMemberChatRoomRepository
+                .findExistMemberInChatRoomByMemberId(memberIds, room.getId());
+
+        if(!isExistMembersInChatRoom.isEmpty()) {
+            isExistMembersInChatRoom.forEach(mc -> promiseMembers.remove(mc.getMember()));
+        }
 
         promiseMembers.forEach(m -> memberChatRooms.add(MemberChatRoom.builder()
                 .member(m)
@@ -132,6 +145,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public void inviteMembersToChatRoom(Long promiseId, String memberNickname) {
         ChatRoom chatRoom = chatRoomRepository.findByPromiseId(promiseId);
         Member member = customMemberRepository.findMemberByNickname(memberNickname);
+
+
 
         if(Objects.nonNull(chatRoom) && Objects.nonNull(member)) {
             memberChatRoomRepository.save(

@@ -14,9 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
-import static com.example.server.push.contatns.PushCategory.*;
+import static com.example.server.push.contatns.PushCategory.FRIEND_REQUEST;
+import static com.example.server.push.contatns.PushCategory.PROMISE_REQUEST;
 
 @Service
 @Slf4j
@@ -30,6 +32,12 @@ public class PushService {
 
     public void makeAndSendPushNotification(PushCategory pushCategory, String account) {
         String payload = makePayload(pushCategory);
+        String deviceToken = redisClient.getDeviceToken(account);
+
+        if(Objects.isNull(deviceToken)) {
+            throw new RuntimeException("등록된 Device Token 값이 없습니다.");
+        }
+
         String token = TokenUtil.sanitizeTokenString(redisClient.getDeviceToken(account));
 
         SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, bundleId, payload);
