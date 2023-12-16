@@ -1,6 +1,6 @@
 package com.example.server.member;
 
-import com.example.server.chat.dto.CreateRoomForm;
+import com.example.server.chat.service.dto.CreateRoomForm;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -38,5 +38,13 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
         }
 
         return member.account.in(user1, user2);
+    }
+
+    public long updateUserImage(String image, String account) {
+        return queryFactory
+                .update(member)
+                .set(member.img, image)
+                .where(member.account.eq(account))
+                .execute();
     }
 }

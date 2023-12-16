@@ -28,6 +28,8 @@ public class PromiseMember {
 
     private String accepted;
 
+    private String isSucceed;
+
     public void setPromise(Promise promise) {
         this.promise = promise;
     }

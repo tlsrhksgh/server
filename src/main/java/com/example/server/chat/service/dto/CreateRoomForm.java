@@ -1,4 +1,4 @@
-package com.example.server.chat.dto;
+package com.example.server.chat.service.dto;
 
 import lombok.Getter;
 

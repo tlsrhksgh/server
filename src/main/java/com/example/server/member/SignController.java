@@ -5,7 +5,10 @@ import com.example.server.member.dto.SignRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,5 +34,18 @@ public class SignController {
     @GetMapping("/{nickname}/exists/nickname")
     public ResponseEntity<CommonResponse> checkNickNameDuplicate(@PathVariable String nickname) {
         return new ResponseEntity<>(memberService.checkNickNameDuplicate(nickname), HttpStatus.OK);
+    }
+
+    @PostMapping("/user/update-profile")
+    public ResponseEntity<CommonResponse> updateUserInfo(
+            @RequestBody Map<String, String> request,
+            Authentication authentication) {
+        return ResponseEntity.ok(memberService.updateUser(request, authentication));
+    }
+
+    @DeleteMapping("/user/withdraw")
+    public ResponseEntity<Void> withdrawMember(Authentication authentication) {
+        memberService.deleteMember(authentication);
+        return ResponseEntity.ok().build();
     }
 }

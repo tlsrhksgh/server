@@ -1,4 +1,4 @@
-package com.example.server.chat.domain.model;
+package com.example.server.common.entity;
 
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
@@ -19,4 +19,9 @@ public class BaseTimeEntity {
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdDate;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime modifiedDate;
 }

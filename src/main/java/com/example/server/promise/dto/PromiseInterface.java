@@ -13,7 +13,7 @@ public interface PromiseInterface {
     String getDate();
     String getLocation();
     String getMemo();
-    String getOrganizer();
+    String getLeader();
     String getPenalty();
     String getTitle();
 }

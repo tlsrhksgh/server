@@ -7,10 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter
@@ -47,5 +44,11 @@ public class Member {
     public void setRoles(List<Authority> roles) {
         this.roles = roles;
         roles.forEach(o -> o.setMember(this));
+    }
+
+    public void update(Map<String, String> request) {
+        this.nickname = request.containsKey("nickname") ? request.get("nickname") : nickname;
+        this.img = request.containsKey("img") ? request.get("img") : img;
+        this.password = request.containsKey("password") ? request.get("password") : password;
     }
 }

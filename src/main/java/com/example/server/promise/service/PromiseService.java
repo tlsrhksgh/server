@@ -3,6 +3,7 @@ package com.example.server.promise.service;
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
 import com.example.server.member.Member;
+import com.example.server.member.MemberInterface;
 import com.example.server.member.MemberRepository;
 import com.example.server.promise.Promise;
 import com.example.server.promise.PromiseMember;
@@ -13,6 +14,8 @@ import com.example.server.promise.repository.PromiseRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.apache.bcel.classfile.Code;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +39,8 @@ public class PromiseService {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Promise promise = mapper.convertValue(request.get("info"), Promise.class);
-            promise.setOrganizer(currentUser.getNickname());
+            promise.setLeader(currentUser.getNickname());
+            promise.setCompleted("N");
             List<Map<String, String>> members = mapper.convertValue(request.get("members"), List.class);
             List<PromiseMember> promiseMembers = new ArrayList<>();
             promiseMembers.add(PromiseMember.builder().nickname(currentUser.getNickname()).accepted("Y").build());
@@ -64,11 +68,11 @@ public class PromiseService {
     }
 
     // 약속 목록 조회
-    public CommonResponse getPromiseList(String startDateTime, String endDateTime, Authentication authentication) throws Exception {
+    public CommonResponse getPromiseList(String startDateTime, String endDateTime, String completed,Authentication authentication) throws Exception {
         log.info("PromiseService - getPromiseList : START");
         Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
         try {
-            List<PromiseInterface> result = promiseRepository.selectPromiseList(currentUser.getNickname(), startDateTime, endDateTime);
+            List<PromiseInterface> result = promiseRepository.selectPromiseList(currentUser.getNickname(), startDateTime, endDateTime, completed);
             Map<String, Object> resultMap = new HashMap<>();
             resultMap.put("list", result);
             log.info("PromiseService - getPromiseList : SUCCESS");
@@ -79,6 +83,130 @@ public class PromiseService {
                     .build();
         } catch (Exception e) {
             log.error("PromiseService - getPromiseList : Exception");
+            e.printStackTrace();
+            throw new Exception(e);
+        }
+    }
+
+    // 약속 단건 조회
+    public CommonResponse getPromiseInfo(String promiseId, Authentication authentication) throws Exception {
+        log.info("PromiseService - getPromiseInfo : START");
+        try {
+            Promise promise = promiseRepository.findPromiseById(Long.parseLong(promiseId));
+            if (Objects.isNull(promise)) {
+                log.error("PromiseService - getPromiseInfo : FAIL");
+                return CommonResponse.builder()
+                        .resultCode(CodeConst.PROMISE_INFO_FAIL_CODE)
+                        .resultMessage(CodeConst.PROMISE_INFO_FAIL_MESSAGE)
+                        .build();
+            }
+            List<MemberInterface> members = promiseMemberRepository.findMembers(promiseId);
+            Map<String, Object> resultMap = new HashMap<>();
+
+            resultMap.put("promiseInfo", promise);
+            resultMap.put("membersInfo", members);
+            log.info("PromiseService - getPromiseInfo : SUCCESS");
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.SUCCESS_CODE)
+                    .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                    .data(resultMap)
+                    .build();
+        } catch (Exception e) {
+            log.error("PromiseService - getPromiseInfo : Exception");
+            e.printStackTrace();
+            throw new Exception(e);
+        }
+    }
+
+    // 약속 탈퇴
+    @Transactional
+    public CommonResponse exitPromise(Map<String, String> request, Authentication authentication) throws Exception {
+        log.info("PromiseService - exitPromise : START");
+        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+        try {
+            Promise promise = promiseRepository.findPromiseById(Long.parseLong(request.get("promiseId")));
+            if (Objects.isNull(promise)) {
+                log.error("PromiseService - deletePromise : FAIL");
+                return CommonResponse.builder()
+                        .resultCode(CodeConst.PROMISE_INFO_FAIL_CODE)
+                        .resultMessage(CodeConst.PROMISE_INFO_FAIL_MESSAGE)
+                        .build();
+            }
+            // 방장이 나갈 때
+            if (currentUser.getNickname().equals(promise.getLeader())) {
+                List<MemberInterface> members = promiseMemberRepository.findMembers(request.get("promiseId"));
+                String curLeader = currentUser.getNickname();
+                String newLeader = "";
+                for (MemberInterface member : members) {
+                    if (!member.getNickname().equals(curLeader)) {
+                        newLeader = member.getNickname();
+                        break;
+                    }
+                }
+                if (promiseRepository.updateLeader(request.get("promiseId"), newLeader) == 1 && promiseMemberRepository.deletePromiseMemberByPromiseIdAndNickname(Long.parseLong(request.get("promiseId")), currentUser.getNickname()) == 1 ) {
+                    log.info("PromiseService - deletePromise : SUCCESS");
+                    return CommonResponse.builder()
+                            .resultCode(CodeConst.SUCCESS_CODE)
+                            .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                            .build();
+                }
+                log.info("PromiseService - deletePromise : SUCCESS");
+                return CommonResponse.builder()
+                        .resultCode(CodeConst.SUCCESS_CODE)
+                        .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                        .build();
+            } else {
+                if (promiseMemberRepository.deletePromiseMemberByPromiseIdAndNickname(Long.parseLong(request.get("promiseId")), currentUser.getNickname()) == 1 ) {
+                    log.info("PromiseService - deletePromise : SUCCESS");
+                    return CommonResponse.builder()
+                            .resultCode(CodeConst.SUCCESS_CODE)
+                            .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                            .build();
+                }
+                else {
+                    return CommonResponse.builder()
+                            .resultCode(CodeConst.PROMISE_EXIT_FAIL_CODE)
+                            .resultMessage(CodeConst.PROMISE_EXIT_FAIL_MESSAGE)
+                            .build();
+                }
+            }
+        } catch (Exception e) {
+            log.error("PromiseService - exitPromise : Exception");
+            e.printStackTrace();
+            throw new Exception(e);
+        }
+    }
+
+    // 약속 삭제
+    public CommonResponse deletePromise(HashMap<String, String> request, Authentication authentication) throws Exception {
+        log.info("PromiseService - deletePromise : START");
+        Member currentUser = memberRepository.findMemberByAccount(authentication.getName());
+        try {
+            Promise promise = promiseRepository.findPromiseById(Long.parseLong(request.get("promiseId")));
+            if (Objects.isNull(promise)) {
+                log.error("PromiseService - deletePromise : FAIL");
+                return CommonResponse.builder()
+                        .resultCode(CodeConst.PROMISE_INFO_FAIL_CODE)
+                        .resultMessage(CodeConst.PROMISE_INFO_FAIL_MESSAGE)
+                        .build();
+            }
+            if (currentUser.getNickname().equals(promise.getLeader())) {
+                promiseMemberRepository.deletePromiseMembersByPromiseId(Long.parseLong(request.get("promiseId")));
+                promiseRepository.deleteById(Long.parseLong(request.get("promiseId")));
+                log.info("PromiseService - deletePromise : SUCCESS");
+                return CommonResponse.builder()
+                        .resultCode(CodeConst.SUCCESS_CODE)
+                        .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                        .build();
+            } else {
+                log.error("PromiseService - deletePromise : FAIL");
+                return CommonResponse.builder()
+                        .resultCode(CodeConst.PROMISE_DELETE_FAIL_CODE)
+                        .resultMessage(CodeConst.PROMISE_DELETE_FAIL_MESSAGE)
+                        .build();
+            }
+        } catch (Exception e) {
+            log.error("PromiseService - deletePromise : Exception");
             e.printStackTrace();
             throw new Exception(e);
         }
@@ -185,6 +313,52 @@ public class PromiseService {
 
         } catch (Exception e) {
             log.error("PromiseService - inviteFriend : Exception");
+            e.printStackTrace();
+            throw new Exception(e);
+        }
+    }
+
+    // 약속 수정 -- 방장만 하도록 추후 수정
+    public CommonResponse editPromise(Map<String, String> request, Authentication authentication) throws Exception {
+        log.info("PromiseService - editPromise : START");
+        try {
+            String promiseId = request.get("promiseId");
+            String title = request.get("title");
+            String date = request.get("date");
+            String memo = request.get("memo");
+            String penalty = request.get("penalty");
+            String location = request.get("location");
+            promiseRepository.updateInfo(promiseId, title, date, memo, penalty, location);
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.SUCCESS_CODE)
+                    .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                    .build();
+        } catch (Exception e) {
+            log.error("PromiseService - editPromise : Exception");
+            e.printStackTrace();
+            throw new Exception(e);
+        }
+    }
+
+    // 약속 결과 처리 -- 방장만 하도록 추후 수정
+    public CommonResponse result(Map<String, Object> request, Authentication authentication) throws Exception {
+        log.info("PromiseService - result : START");
+        try {
+
+            String requestId = String.valueOf(request.get("promiseId"));
+            ObjectMapper mapper = new ObjectMapper();
+            List<Map<String, String>> result = mapper.convertValue(request.get("result"), List.class);
+            for (Map<String, String> map : result) {
+                promiseMemberRepository.updateIsSucceed(requestId, map.get("nickname"), map.get("isSucceed"));
+            }
+            promiseRepository.updateCompleted(requestId);
+
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.SUCCESS_CODE)
+                    .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                    .build();
+        } catch (Exception e) {
+            log.error("PromiseService - result : Exception");
             e.printStackTrace();
             throw new Exception(e);
         }

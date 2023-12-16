@@ -3,6 +3,7 @@ package com.example.server.promise.repository;
 import com.example.server.promise.Promise;
 import com.example.server.promise.dto.PromiseInterface;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,17 +12,44 @@ import java.util.List;
 @Transactional
 public interface PromiseRepository extends JpaRepository<Promise, Long> {
 
-    @Query(value = "SELECT id, date, location, memo, organizer, penalty, title " +
+    @Query(value = "SELECT id, date, location, memo, leader, penalty, title " +
             "FROM Promise " +
             "WHERE id IN ( " +
-            "SELECT promise_id FROM PromiseMember WHERE nickname = ?1 AND accepted = 'Y') AND date BETWEEN ?2 AND ?3 "
+            "SELECT promise_id FROM PromiseMember WHERE nickname = ?1 AND accepted = 'Y') AND date BETWEEN ?2 AND ?3 AND completed = ?4"
             , nativeQuery = true)
-    List<PromiseInterface> selectPromiseList(String nickname, String start, String end) throws Exception;
+    List<PromiseInterface> selectPromiseList(String nickname, String start, String end, String completed) throws Exception;
 
-    @Query(value = "SELECT id, date, location, memo, organizer, penalty, title " +
+    @Query(value = "SELECT id, date, location, memo, leader, penalty, title " +
             "FROM Promise " +
             "WHERE id IN ( " +
             "SELECT promise_id FROM PromiseMember WHERE nickname = ?1 AND accepted = 'N')"
             , nativeQuery = true)
     List<PromiseInterface> selectPromiseRequestList(String nickname) throws Exception;
+
+    Promise findPromiseById(long id) throws Exception;
+
+    @Modifying(clearAutomatically = true)
+    @Query(value = "UPDATE Promise " +
+            "SET leader = ?2 " +
+            "WHERE id = ?1 "
+            , nativeQuery = true)
+    Integer updateLeader(String promiseId, String newLeader) throws Exception;
+
+    @Modifying(clearAutomatically = true)
+    @Query(value = "UPDATE Promise " +
+            "SET title = ?2 " +
+            ", date = ?3 " +
+            ", memo = ?4 " +
+            ", penalty = ?5 " +
+            ", location = ?6 " +
+            "WHERE id = ?1 "
+            , nativeQuery = true)
+    Integer updateInfo(String promiseId, String title, String date, String memo, String penalty, String location) throws Exception;
+
+    @Modifying(clearAutomatically = true)
+    @Query(value = "UPDATE Promise " +
+            "SET completed = 'Y' " +
+            "WHERE id = ?1 "
+            , nativeQuery = true)
+    Integer updateCompleted(String promiseId) throws Exception;
 }

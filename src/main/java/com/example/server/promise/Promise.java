@@ -34,11 +34,13 @@ public class Promise {
 
     private String penalty;
 
-    private String organizer;
+    private String leader;
 
     private String date;
 
     private String memo;
+
+    private String completed;
 
     @CreatedDate
     private LocalDateTime createdDate;
@@ -47,7 +49,7 @@ public class Promise {
     private LocalDateTime modifiedDate;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "promise", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "promise", cascade = CascadeType.ALL)
     @Builder.Default
     private List<PromiseMember> members = new ArrayList<>();
 
