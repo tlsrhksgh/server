@@ -63,7 +63,7 @@ public class PushService {
             e.printStackTrace();
         }
         long endTime = System.currentTimeMillis();
-        log.info("푸쉬 완료까지 소요된 시간: {}" + (endTime - startTime) + "ms");
+        log.info("푸쉬 완료까지 소요된 시간: " + (endTime - startTime) + "ms");
     }
 
     private String makePayload(PushCategory pushCategory) {

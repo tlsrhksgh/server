@@ -55,8 +55,6 @@ public class PromiseService {
 
             List<Member> memberList = customMemberRepository.findMembersByNicknames(memberNicknames);
 
-            memberList.add(currentUser);
-
             promiseMembers.add(PromiseMember.builder().nickname(currentUser.getNickname()).accepted("Y").build());
             if (!members.isEmpty()) {
                 for (Member member : memberList) {
@@ -68,9 +66,11 @@ public class PromiseService {
             }
             promise.setMembers(promiseMembers);
 
+            memberList.add(currentUser);
+            chatRoomService.createChatRoom(promise, memberList);
+
             Map<String, Object> resultMap = new HashMap<>();
             Promise promiseInfo = promiseRepository.save(promise);
-            chatRoomService.createChatRoom(promise, memberList);
             resultMap.put("info", promiseInfo);
             log.info("PromiseService - createPromise : SUCCESS");
             return CommonResponse.builder()
