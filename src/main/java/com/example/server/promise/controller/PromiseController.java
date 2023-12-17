@@ -39,7 +39,7 @@ public class PromiseController {
     // 약속 탈퇴
     @PostMapping(value = "promise/exitPromise")
     public ResponseEntity<CommonResponse> exitPromise(@RequestBody Map<String, String> request, Authentication authentication) throws Exception {
-        return new ResponseEntity<>(promiseService.exitPromise(request, authentication), HttpStatus.OK);
+        return new ResponseEntity<>(promiseService.exitPromise(request.get("promiseId"), authentication), HttpStatus.OK);
     }
 
     // 약속 삭제

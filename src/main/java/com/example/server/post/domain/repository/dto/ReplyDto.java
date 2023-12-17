@@ -11,6 +11,7 @@ public class ReplyDto {
     private final String content;
     private final String modifiedDate;
 
+
     @QueryProjection
     public ReplyDto(Long id, String title, String content, String author, String modifiedDate) {
         this.id = id;

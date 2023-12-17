@@ -59,4 +59,12 @@ public class CodeConst {
     // 약속 단건 조회 실패
     public static final String PROMISE_INFO_FAIL_CODE = "430";
     public static final String PROMISE_INFO_FAIL_MESSAGE = "NO THAT PROMISE";
+
+    // 채팅방 없음
+    public static final String CHATROOM_NOT_FOUND_CODE = "404";
+    public static final String CHATROOM_NOT_FOUND_MESSAGE = "CHATROOM NOT FOUND";
+
+    // 참가 되지 않았거나 채팅방이 존재하지 않음.
+    public static final String IS_NOT_PARTICIPANT_OR_CHATROOM_NOT_FOUND_CODE = "400";
+    public static final String IS_NOT_PARTICIPANT_OR_CHATROOM_NOT_FOUND_MESSAGE = "IS NOT PARTICIPANT OR CHATROOM NOT FOUND";
 }

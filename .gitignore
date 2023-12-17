@@ -34,3 +34,4 @@ build/
 
 ##db
 application-db.yml
+application-apns.yml

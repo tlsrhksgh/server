@@ -24,6 +24,8 @@ public class Promise extends BaseTimeEntity {
 
     private String location;
 
+    private String nickname;
+
     private String coordinate;
 
     private String penalty;
