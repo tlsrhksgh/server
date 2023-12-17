@@ -43,7 +43,6 @@ public class PromiseService {
     // 약속 생성
     public CommonResponse createPromise(HashMap<String, Object> request, Authentication authentication) throws Exception {
         log.info("PromiseService - createPromise : START");
-        List<String> memberNicknames = new ArrayList<>();
         Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -53,25 +52,32 @@ public class PromiseService {
             List<Map<String, String>> members = mapper.convertValue(request.get("members"), List.class);
             List<PromiseMember> promiseMembers = new ArrayList<>();
 
-            List<Member> memberList = customMemberRepository.findMembersByNicknames(memberNicknames);
-
-            promiseMembers.add(PromiseMember.builder().nickname(currentUser.getNickname()).accepted("Y").build());
-            if (!members.isEmpty()) {
-                for (Member member : memberList) {
-                    String nickname = member.getNickname();
+            List<String> memberNicknames = new ArrayList<>();
+            if(!members.isEmpty()) {
+                for (Map<String, String> member : members) {
+                    String nickname = member.get("nickname");
                     promiseMembers.add(PromiseMember.builder().nickname(nickname).accepted("N").build());
                     memberNicknames.add(nickname);
+                }
+            }
+            promiseMembers.add(PromiseMember.builder().nickname(currentUser.getNickname()).accepted("Y").build());
+
+            List<Member> memberList = new ArrayList<>();
+            if(!members.isEmpty()) {
+                memberList = customMemberRepository.findMembersByNicknames(memberNicknames);
+                for (Member member : memberList) {
                     pushService.makeAndSendPushNotification(PushCategory.PROMISE_REQUEST, member.getAccount());
                 }
             }
-            promise.setMembers(promiseMembers);
 
-            memberList.add(currentUser);
-            chatRoomService.createChatRoom(promise, memberList);
+            promise.setMembers(promiseMembers);
 
             Map<String, Object> resultMap = new HashMap<>();
             Promise promiseInfo = promiseRepository.save(promise);
             resultMap.put("info", promiseInfo);
+
+            memberList.add(currentUser);
+            chatRoomService.createChatRoom(promiseInfo, memberList);
             log.info("PromiseService - createPromise : SUCCESS");
             return CommonResponse.builder()
                     .resultCode(CodeConst.SUCCESS_CODE)
