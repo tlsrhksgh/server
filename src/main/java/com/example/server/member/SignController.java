@@ -19,7 +19,7 @@ public class SignController {
     }
 
     @PostMapping(value = "/register")
-    public ResponseEntity<CommonResponse> signup(@RequestBody SignRequest request) throws Exception {
+    public ResponseEntity<CommonResponse> signup(@ModelAttribute SignRequest request) throws Exception {
         return ResponseEntity.ok(signService.register(request));
     }
 
