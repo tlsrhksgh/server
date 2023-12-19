@@ -1,5 +1,6 @@
 package com.example.server.member;
 
+import com.example.server.member.dto.UpdateRequest;
 import com.example.server.promise.PromiseMember;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.jpa.repository.Modifying;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 
 import static com.example.server.member.QAuthority.authority;
 import static com.example.server.member.QMember.member;
@@ -66,16 +66,14 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
 
     @Transactional
     @Modifying(clearAutomatically = true)
-    public void updateMemberWithRelatedEntities(Map<String, String> request, Member member) {
+    public void updateMemberWithRelatedEntities(UpdateRequest request, Member member) {
         String oldNickname = member.getNickname();
 
-        String newNickname = request.get("nickname") == null ?
-                oldNickname : request.get("nickname");
+        String newNickname = request.getNickname() == null ?
+                oldNickname : request.getNickname();
 
-        String newPassword = request.get("password") == null ?
-                member.getPassword() : request.get("password");
-
-        String newImg = request.get("img") == null ? member.getImg() : request.get("img");
+        String newPassword = request.getPassword() == null ?
+                member.getPassword() : null;
 
         String memberRelatedEntitiesUpdateQuery = "UPDATE Member m " +
                 "LEFT JOIN Friend f ON m.nickname = f.requester OR m.nickname = f.respondent " +
@@ -88,7 +86,7 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
                 "    po.author = CASE WHEN po.author = ? THEN ? ELSE po.author END, " +
                 "    pr.leader = CASE WHEN pr.leader = ? THEN ? ELSE pr.leader END, " +
                 "    pm.nickname = CASE WHEN pm.nickname = ? THEN ? ELSE pm.nickname END, " +
-                "    m.nickname = ?, m.password = ?, m.img = ? " +
+                "    m.nickname = ?, m.password = ? " +
                 "    WHERE m.memberId = ?";
 
         jdbcTemplate.update(memberRelatedEntitiesUpdateQuery,
@@ -97,7 +95,7 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
                 oldNickname, newNickname,
                 oldNickname, newNickname,
                 oldNickname, newNickname,
-                newNickname, newPassword, newImg,
+                newNickname, newPassword,
                 member.getMemberId());
     }
 }

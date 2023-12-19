@@ -33,7 +33,6 @@ public class Member {
 
     private Integer exp;
 
-    @Lob
     private String img;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)

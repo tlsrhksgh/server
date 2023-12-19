@@ -3,19 +3,18 @@ package com.example.server.member;
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
 import com.example.server.common.client.RedisClient;
+import com.example.server.file.FileService;
 import com.example.server.member.component.MailComponent;
 import com.example.server.member.dto.SignRequest;
 import com.example.server.security.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -30,6 +29,7 @@ public class SignService {
     private final MailComponent mailComponent;
     private final ObjectMapper mapper;
     private final RedisClient redisClient;
+    private final FileService fileService;
 
     // 로그인
     public CommonResponse login(SignRequest request) {
@@ -79,7 +79,7 @@ public class SignService {
                     .nickname(request.getNickname())
                     .level(1)
                     .exp(0)
-                    .img(request.getImg())
+                    .img(fileService.memberImgFileUpload(request.getImg()))
                     .build();
 
             member.setRoles(Collections.singletonList(Authority.builder().name("ROLE_USER").build()));

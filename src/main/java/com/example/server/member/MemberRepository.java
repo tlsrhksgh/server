@@ -3,6 +3,7 @@ package com.example.server.member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -23,4 +24,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             "WHERE nickname = ?1"
             , nativeQuery = true)
     Integer updateExp(String nickname) throws Exception;
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Member m SET m.img = :imgUrl WHERE m.account = :account")
+    void updateMemberImg(@Param("imgUrl") String imgUrl, @Param("account") String account);
 }
