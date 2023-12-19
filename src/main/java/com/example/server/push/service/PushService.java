@@ -1,6 +1,7 @@
 package com.example.server.push.service;
 
 import com.eatthepath.pushy.apns.ApnsClient;
+import com.eatthepath.pushy.apns.ApnsPushNotification;
 import com.eatthepath.pushy.apns.PushNotificationResponse;
 import com.eatthepath.pushy.apns.util.ApnsPayloadBuilder;
 import com.eatthepath.pushy.apns.util.SimpleApnsPayloadBuilder;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import static com.example.server.push.contatns.PushCategory.*;
@@ -21,7 +23,7 @@ import static com.example.server.push.contatns.PushCategory.*;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PushService {
+public class PushService<T extends ApnsPushNotification> {
     private final RedisClient redisClient;
     private final ApnsClient apnsClient;
 
@@ -29,12 +31,16 @@ public class PushService {
     private String bundleId;
 
     public void makeAndSendPushNotification(PushCategory pushCategory, String account) {
-        String payload = makePayload(pushCategory);
-        String token = TokenUtil.sanitizeTokenString(redisClient.getDeviceToken(account));
+        String deviceToken = redisClient.getDeviceToken(account);
 
-        SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, bundleId, payload);
+        if(Objects.nonNull(deviceToken)) {
+            String payload = makePayload(pushCategory);
+            String token = TokenUtil.sanitizeTokenString(redisClient.getDeviceToken(account));
 
-        sendPushNotification(pushNotification);
+            SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, bundleId, payload);
+
+            sendPushNotification(pushNotification);
+        }
     }
 
     private void sendPushNotification(SimpleApnsPushNotification pushNotification) {

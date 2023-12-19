@@ -2,10 +2,11 @@ package com.example.server.member.service;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
+import com.example.server.file.FileService;
 import com.example.server.member.CustomMemberRepository;
 import com.example.server.member.Member;
 import com.example.server.member.MemberRepository;
-import com.example.server.promise.Promise;
+import com.example.server.member.dto.UpdateRequest;
 import com.example.server.promise.PromiseMember;
 import com.example.server.promise.service.PromiseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,8 +29,9 @@ import java.util.Objects;
 public class MemberService {
     private final CustomMemberRepository customMemberRepository;
     private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
     private final PromiseService promiseService;
+    private final FileService fileService;
+    private final PasswordEncoder passwordEncoder;
 
     public CommonResponse getInfo(Authentication authentication) throws Exception {
         Member member = customMemberRepository.findMemberByAccount(authentication.getName());
@@ -48,7 +50,7 @@ public class MemberService {
 
     // 닉네임, 패스워드, 이미지 변경
     @Transactional
-    public CommonResponse updateMember(Map<String, String> request, Authentication authentication) {
+    public CommonResponse updateMember(UpdateRequest request, Authentication authentication) {
         Member member = customMemberRepository.findMemberByAccount(authentication.getName());
 
         if (Objects.isNull(member)) {
@@ -58,8 +60,8 @@ public class MemberService {
                     .build();
         }
 
-        if(Objects.nonNull(request.get("nickname"))) {
-            boolean isExistMember = memberRepository.existsByNickname(request.get("nickname"));
+        if(Objects.nonNull(request.getNickname())) {
+            boolean isExistMember = memberRepository.existsByNickname(request.getNickname());
             if(isExistMember) {
                 return CommonResponse.builder()
                         .resultCode(CodeConst.DUPLICATED_NICKNAME_CODE)
@@ -68,11 +70,15 @@ public class MemberService {
             }
         }
 
-        if(Objects.nonNull(request.get("password"))) {
-            request.put("password", passwordEncoder.encode(request.get("password")));
+        if(Objects.nonNull(request.getPassword())) {
+            request.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
         customMemberRepository.updateMemberWithRelatedEntities(request, member);
+
+        if(request.isImgUpdate()) {
+            fileService.updateMemberImgFile(request.getImg(), member);
+        }
 
         return CommonResponse.builder()
                 .resultCode(CodeConst.SUCCESS_CODE)
@@ -91,6 +97,7 @@ public class MemberService {
             for(PromiseMember promiseMember : promiseMembers) {
                 promiseService.exitPromise(String.valueOf(promiseMember.getPromise().getId()), authentication);
             }
+            fileService.deleteMemberImgFile(member.getImg());
             memberRepository.delete(member);
 
             return CommonResponse.builder()

@@ -1,6 +1,7 @@
 package com.example.server.member.controller;
 
 import com.example.server.common.CommonResponse;
+import com.example.server.member.dto.UpdateRequest;
 import com.example.server.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class MemberController {
 
     @PatchMapping("/update-profile")
     public ResponseEntity<CommonResponse> updateUserInfo(
-            @RequestBody Map<String, String> request,
+            @RequestBody UpdateRequest request,
             Authentication authentication) {
         return ResponseEntity.ok(memberService.updateMember(request, authentication));
     }
