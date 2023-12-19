@@ -24,7 +24,7 @@ public class MemberController {
 
     @PatchMapping("/update-profile")
     public ResponseEntity<CommonResponse> updateUserInfo(
-            @RequestBody UpdateRequest request,
+            @ModelAttribute UpdateRequest request,
             Authentication authentication) {
         return ResponseEntity.ok(memberService.updateMember(request, authentication));
     }

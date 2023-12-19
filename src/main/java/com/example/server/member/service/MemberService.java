@@ -33,7 +33,7 @@ public class MemberService {
     private final FileService fileService;
     private final PasswordEncoder passwordEncoder;
 
-    public CommonResponse getInfo(Authentication authentication) throws Exception {
+    public CommonResponse getInfo(Authentication authentication) {
         Member member = customMemberRepository.findMemberByAccount(authentication.getName());
 
         ObjectMapper mapper = new ObjectMapper();
