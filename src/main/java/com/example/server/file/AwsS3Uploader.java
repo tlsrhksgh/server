@@ -30,6 +30,7 @@ public class AwsS3Uploader {
         PutObjectRequest putObj = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(translatedFileName)
+                .contentType(imgFile.getContentType())
                 .build();
 
         try {
