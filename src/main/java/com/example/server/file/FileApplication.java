@@ -8,6 +8,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -30,6 +31,9 @@ public class FileApplication {
     }
 
     public String splitImageUrl(String imageUrl) {
+        if(Objects.isNull(imageUrl)) {
+            return null;
+        }
         String[] splitUrl = imageUrl.split("/");
         return splitUrl[splitUrl.length - 1];
     }
