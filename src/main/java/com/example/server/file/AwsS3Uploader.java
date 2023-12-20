@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -44,19 +45,21 @@ public class AwsS3Uploader {
 
 
     public void delete(String fileUrl) {
-        ObjectIdentifier key = ObjectIdentifier.builder()
-                .key(fileUrl)
-                .build();
+        if(Objects.nonNull(fileUrl)) {
+            ObjectIdentifier key = ObjectIdentifier.builder()
+                    .key(fileUrl)
+                    .build();
 
-        Delete del = Delete.builder()
-                .objects(key)
-                .build();
+            Delete del = Delete.builder()
+                    .objects(key)
+                    .build();
 
-        DeleteObjectsRequest multiObjectDeleteRequest = DeleteObjectsRequest.builder()
-                .bucket(bucket)
-                .delete(del)
-                .build();
+            DeleteObjectsRequest multiObjectDeleteRequest = DeleteObjectsRequest.builder()
+                    .bucket(bucket)
+                    .delete(del)
+                    .build();
 
-        s3Client.deleteObjects(multiObjectDeleteRequest);
+            s3Client.deleteObjects(multiObjectDeleteRequest);
+        }
     }
 }

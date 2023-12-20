@@ -107,22 +107,17 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     @Transactional
     public void deleteChatroom(Long promiseId, Member member, DeleteRoomType type) {
-        MemberChatRoom memberChatRoom = memberChatRoomRepository.
-                findByChatRoom_IdAndMember_MemberId(promiseId, member.getMemberId());
+        if(type.equals(DELETE)) {
+            customMemberChatRoomRepository.deleteMemberChatroomByRoomId(promiseId);
+            chatRoomRepository.deleteById(promiseId);
+        } else if(type.equals(EXIT)) {
+            int participatedMemberCount = customMemberChatRoomRepository.
+                    countParticipatedMemberByChatRoomId(promiseId);
 
-        if(Objects.nonNull(memberChatRoom)) {
-            if(type.equals(DELETE)) {
-                customMemberChatRoomRepository.deleteMemberChatroomByRoomId(promiseId);
+            memberChatRoomRepository.deleteMemberChatRoomByChatRoom_IdAndMember_MemberId(promiseId, member.getMemberId());
+
+            if(participatedMemberCount <= 1) {
                 chatRoomRepository.deleteById(promiseId);
-            } else if(type.equals(EXIT)) {
-                int participatedMemberCount = customMemberChatRoomRepository.
-                        countParticipatedMemberByChatRoomId(promiseId);
-
-                memberChatRoomRepository.deleteMemberChatRoomByChatRoom_IdAndMember_Nickname(promiseId, member.getNickname());
-
-                if(participatedMemberCount <= 1) {
-                    chatRoomRepository.deleteById(promiseId);
-                }
             }
         }
     }

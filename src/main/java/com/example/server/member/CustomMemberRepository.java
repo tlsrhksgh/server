@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 import static com.example.server.member.QAuthority.authority;
 import static com.example.server.member.QMember.member;
@@ -55,7 +56,7 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
                 .fetch();
     }
 
-    public List<Member> findMembersByNicknames(List<String> nicknames) {
+    public List<Member> findMembersByNicknames(Set<String> nicknames) {
         return queryFactory
                 .selectFrom(member)
                 .where(member.nickname.in(nicknames))
@@ -73,7 +74,7 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
                 oldNickname : request.getNickname();
 
         String newPassword = request.getPassword() == null ?
-                member.getPassword() : null;
+                member.getPassword() : request.getPassword();
 
         String memberRelatedEntitiesUpdateQuery = "UPDATE Member m " +
                 "LEFT JOIN Friend f ON m.nickname = f.requester OR m.nickname = f.respondent " +

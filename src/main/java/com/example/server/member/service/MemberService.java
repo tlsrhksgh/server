@@ -76,13 +76,15 @@ public class MemberService {
 
         customMemberRepository.updateMemberWithRelatedEntities(request, member);
 
+        Map<String, Object> updateImgMap = new HashMap<>();
         if(request.isImgUpdate()) {
-            fileService.updateMemberImgFile(request.getImg(), member);
+            updateImgMap.put("img", fileService.updateMemberImgFile(request.getImg(), member));
         }
 
         return CommonResponse.builder()
                 .resultCode(CodeConst.SUCCESS_CODE)
                 .resultMessage(CodeConst.SUCCESS_MESSAGE)
+                .data(updateImgMap)
                 .build();
     }
 
