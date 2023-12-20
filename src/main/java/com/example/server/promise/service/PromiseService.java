@@ -52,7 +52,7 @@ public class PromiseService {
             List<Map<String, String>> members = mapper.convertValue(request.get("members"), List.class);
             List<PromiseMember> promiseMembers = new ArrayList<>();
 
-            List<String> memberNicknames = new ArrayList<>();
+            Set<String> memberNicknames = new HashSet<>();
             if(!members.isEmpty()) {
                 for (Map<String, String> member : members) {
                     String nickname = member.get("nickname");
@@ -179,8 +179,7 @@ public class PromiseService {
                             .resultMessage(CodeConst.SUCCESS_MESSAGE)
                             .build();
                 }
-                if (promiseRepository.updateLeader(promiseId, newLeader) == 1 &&
-                        promiseMemberRepository.deletePromiseMemberByPromiseIdAndNickname(Long.parseLong(promiseId), currentUser.getNickname()) == 1 ) {
+                if (promiseRepository.updateLeader(promiseId, newLeader) == 1 && promiseMemberRepository.deletePromiseMemberByPromiseIdAndNickname(Long.parseLong(promiseId), currentUser.getNickname()) == 1 ) {
                     log.info("PromiseService - exitPromise : SUCCESS");
                     return CommonResponse.builder()
                             .resultCode(CodeConst.SUCCESS_CODE)

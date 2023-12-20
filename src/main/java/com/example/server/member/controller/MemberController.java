@@ -9,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/member")
 @RequiredArgsConstructor
@@ -26,6 +24,7 @@ public class MemberController {
     public ResponseEntity<CommonResponse> updateUserInfo(
             @ModelAttribute UpdateRequest request,
             Authentication authentication) {
+        System.out.println(request.getNickname() + request.getPassword() + request.getImg());
         return ResponseEntity.ok(memberService.updateMember(request, authentication));
     }
 

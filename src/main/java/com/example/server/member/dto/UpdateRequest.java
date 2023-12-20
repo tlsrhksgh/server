@@ -8,7 +8,7 @@ public class UpdateRequest {
     private String nickname;
     private String password;
     private MultipartFile img;
-    private boolean isImgUpdate;
+    private boolean imgUpdate;
 
     public void setPassword(String password) {
         this.password = password;

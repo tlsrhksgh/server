@@ -26,6 +26,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Integer updateExp(String nickname) throws Exception;
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE Member m SET m.img = :imgUrl WHERE m.account = :account")
+    @Query("UPDATE Member m SET m.img = COALESCE(:imgUrl, '') WHERE m.account = :account")
     void updateMemberImg(@Param("imgUrl") String imgUrl, @Param("account") String account);
 }

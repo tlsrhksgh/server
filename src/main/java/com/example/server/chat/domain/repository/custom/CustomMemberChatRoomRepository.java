@@ -56,11 +56,11 @@ public class CustomMemberChatRoomRepository extends QuerydslRepositorySupport {
     }
 
     @Transactional
-    public Integer countParticipatedMemberByChatRoomId(Long roomId) {
+    public Integer countParticipatedMemberByChatRoomId(Long promiseId) {
         return Math.toIntExact(queryFactory
                 .select(memberChatRoom.member().memberId.count())
                 .from(memberChatRoom)
-                .where(memberChatRoom.chatRoom().id.eq(roomId))
+                .where(memberChatRoom.chatRoom().promiseId.eq(promiseId))
                 .fetchFirst());
     }
 
