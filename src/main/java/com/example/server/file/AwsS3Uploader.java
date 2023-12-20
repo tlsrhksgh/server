@@ -47,7 +47,7 @@ public class AwsS3Uploader {
 
     @Transactional
     public void delete(String fileUrl) {
-        if(!Objects.equals(fileUrl, "")) {
+        if(Objects.nonNull(fileUrl) && !fileUrl.equals("")) {
             ObjectIdentifier key = ObjectIdentifier.builder()
                     .key(fileUrl)
                     .build();
