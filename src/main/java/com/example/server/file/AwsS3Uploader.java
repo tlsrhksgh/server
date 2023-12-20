@@ -25,6 +25,7 @@ public class AwsS3Uploader {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    @Transactional
     public String uploadFile(MultipartFile imgFile) {
         String translatedFileName = fileApplication.translateFileName(imgFile.getOriginalFilename());
 
@@ -44,8 +45,9 @@ public class AwsS3Uploader {
     }
 
 
+    @Transactional
     public void delete(String fileUrl) {
-        if(Objects.nonNull(fileUrl)) {
+        if(!Objects.equals(fileUrl, "")) {
             ObjectIdentifier key = ObjectIdentifier.builder()
                     .key(fileUrl)
                     .build();
