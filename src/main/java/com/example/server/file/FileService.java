@@ -36,8 +36,7 @@ public class FileService {
     @Transactional
     public String updateMemberImgFile(MultipartFile file, Member member) {
         String currentImg = member.getImg();
-
-        s3Uploader.delete(currentImg);
+        s3Uploader.delete(fileApplication.splitImageUrl(currentImg));
 
         if(Objects.isNull(file)) {
             memberRepository.updateMemberImg(null, member.getAccount());
@@ -55,6 +54,6 @@ public class FileService {
 
     @Transactional
     public void deleteMemberImgFile(String imageUrl) {
-        s3Uploader.delete(imageUrl);
+        s3Uploader.delete(fileApplication.splitImageUrl(imageUrl));
     }
 }
