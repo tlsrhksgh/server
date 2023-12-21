@@ -24,7 +24,6 @@ public class MemberController {
     public ResponseEntity<CommonResponse> updateUserInfo(
             @ModelAttribute UpdateRequest request,
             Authentication authentication) {
-        System.out.println(request.getNickname() + request.getPassword() + request.getImg());
         return ResponseEntity.ok(memberService.updateMember(request, authentication));
     }
 
