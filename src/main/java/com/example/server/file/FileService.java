@@ -44,12 +44,10 @@ public class FileService {
         }
 
         fileApplication.fileMimeTypeCheck(file);
-        String translatedFileName = this.memberImgFileUpload(file);
+        String translatedFileUrl = this.memberImgFileUpload(file);
 
-        String imgUrl = imageUrl + translatedFileName;
-
-        memberRepository.updateMemberImg(imgUrl, member.getAccount());
-        return imgUrl;
+        memberRepository.updateMemberImg(translatedFileUrl, member.getAccount());
+        return translatedFileUrl;
     }
 
     @Transactional
