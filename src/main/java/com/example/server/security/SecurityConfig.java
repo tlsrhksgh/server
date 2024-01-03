@@ -1,5 +1,6 @@
 package com.example.server.security;
 
+import com.example.server.member.CustomMemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -42,12 +43,12 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/register", "/login", "/**/exists/**", "/ws/**", "/verify-code", "/chat/**")
+                .antMatchers("/register", "/login", "/**/exists/**", "/ws/**", "/verify-code")
                 .permitAll()
                 .antMatchers("/admin/**")
                 .hasRole("ADMIN")
-                .antMatchers("/user/**",
-                        "/friend/**", "/promise/**", "/member/**", "/post/**").authenticated()
+                .antMatchers("/user/**", "/friend/**", "/promise/**", "/member/**", "/post/**", "/chat/**")
+                .authenticated()
                 .anyRequest().denyAll()
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)

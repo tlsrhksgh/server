@@ -18,6 +18,14 @@ public class CodeConst {
     public static final String DUPLICATED_NICKNAME_CODE = "409";
     public static final String DUPLICATED_NICKNAME_MESSAGE = "DUPLICATED NICKNAME";
 
+    // refresh token 만료
+    public static final String REQUIRED_LOGIN_CODE = "401";
+    public static final String REQUIRED_LOGIN_MESSAGE = "REQUIRED LOGIN";
+
+    // access token 발급 성공
+    public static final String ACCESS_TOKEN_ISSUED_SUCCESS_CODE = "200";
+    public static final String ACCESS_TOKEN_ISSUED_SUCCESS_MESSAGE = "ISSUED SUCCESS";
+
     // 이미지 변경 실패
     public static final String IMAGE_CHANGE_FAIL_CODE = "412";
     public static final String IMAGE_CHANGE_FAIL_MESSAGE = "CHANGING IMAGE REQUEST FAILED";

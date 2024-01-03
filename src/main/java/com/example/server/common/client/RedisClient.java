@@ -1,5 +1,6 @@
 package com.example.server.common.client;
 
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -20,15 +21,15 @@ public class RedisClient {
         return (String) redisTemplate.opsForHash().get(DEVICE_TOKEN_KEY.getKey(), key);
     }
 
-    public void deviceTokenPut(String account, String deviceToken) {
-        put(account, deviceToken);
+    public void tokenPut(String account, String token) {
+        deviceTokenPut(account, token);
     }
 
-    private void put(String key, Object value) {
+    private void deviceTokenPut(String key, String deviceToken) {
         try {
-            redisTemplate.opsForHash().put(DEVICE_TOKEN_KEY.getKey(), key, mapper.writeValueAsString(value));
+            redisTemplate.opsForHash().put(DEVICE_TOKEN_KEY.getKey(), key, mapper.writeValueAsString(deviceToken));
         } catch (JsonProcessingException e) {
-            log.error("RedisClient put exception: {}", e.getMessage());
+            log.error("RedisClient deviceTokenPut exception: {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
