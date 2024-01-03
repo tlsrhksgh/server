@@ -9,5 +9,4 @@ public enum RedisKeys {
     DEVICE_TOKEN_KEY("deviceTokens");
 
     private final String key;
-
 }

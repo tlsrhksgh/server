@@ -29,7 +29,7 @@ public class SocketHandler implements ChannelInterceptor {
             log.info("웹소켓 연결 요청");
             String jwtToken = accessor.getFirstNativeHeader("Authorization");
 
-            if(!jwtProvider.validateToken(jwtToken)) {
+            if(!jwtProvider.validateAccessToken(jwtToken)) {
                 throw new RuntimeException("로그인이 필요합니다.");
             }
 

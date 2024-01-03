@@ -1,21 +1,54 @@
 package com.example.server.member;
 
+import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
 import com.example.server.member.dto.SignRequest;
+import com.example.server.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class SignController {
     private final SignService signService;
+    private final JwtProvider jwtProvider;
 
     @PostMapping(value = "/login")
-    public ResponseEntity<CommonResponse> signin(@RequestBody SignRequest request) throws Exception {
+    public ResponseEntity<CommonResponse> signin(@RequestBody SignRequest request) {
         return ResponseEntity.ok(signService.login(request));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<CommonResponse> refresh(@RequestBody Map<String, String> bodyJson) {
+        String reIssuedAccessToken = jwtProvider.validateRefreshToken(bodyJson.get("refreshToken"));
+
+        CommonResponse commonResponse;
+
+        if(Objects.isNull(reIssuedAccessToken)) {
+            commonResponse = CommonResponse.builder()
+                    .resultCode(CodeConst.REQUIRED_LOGIN_CODE)
+                    .resultMessage(CodeConst.REQUIRED_LOGIN_MESSAGE)
+                    .build();
+            return ResponseEntity.badRequest().body(commonResponse);
+        }
+
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("accessToken", reIssuedAccessToken);
+
+        commonResponse = CommonResponse.builder()
+                .resultCode(CodeConst.ACCESS_TOKEN_ISSUED_SUCCESS_CODE)
+                .resultMessage(CodeConst.ACCESS_TOKEN_ISSUED_SUCCESS_MESSAGE)
+                .data(resultMap)
+                .build();
+
+        return ResponseEntity.ok(commonResponse);
     }
 
     @PostMapping(value = "/register")

@@ -1,14 +1,12 @@
 package com.example.server.security;
 
 import com.example.server.member.Authority;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,19 +18,24 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class JwtProvider {
-
     @Value("${jwt.secret.key}")
     private String salt;
 
     private Key secretKey;
 
-    // 만료시간 : 1Hour
-    private final long exp = 1000L * 60 * 60;
+    // 만료시간 : 1Minutes
+    private final long ACCESS_EXPIRATION_TIME = 1000L * 60;
 
+    // 만료시간 : 24Hour
+    private final long REFRESH_EXPIRATION_TIME = 24 * 60 * 60 * 1000L;
+
+    private final RedisTemplate redisTemplate;
     private final JpaUserDetailsService userDetailsService;
 
     @PostConstruct
@@ -41,14 +44,28 @@ public class JwtProvider {
     }
 
     // 토큰 생성
-    public String createToken(String account, List<Authority> roles) {
+    public String createAccessToken(String account, List<Authority> roles) {
         Claims claims = Jwts.claims().setSubject(account);
         claims.put("roles", roles);
         Date now = new Date();
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + exp))
+                .setExpiration(new Date(now.getTime() + ACCESS_EXPIRATION_TIME))
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String createRefreshToken(String account, List<Authority> roles){
+        Claims claims = Jwts.claims().setSubject(account);
+        claims.put("roles", roles);
+        Date now = new Date();
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + REFRESH_EXPIRATION_TIME))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -56,10 +73,7 @@ public class JwtProvider {
     // 권한정보 획득
     // Spring Security 인증과정에서 권한확인을 위한 기능
     public Authentication getAuthentication(String token) {
-        System.out.println("GETAUTHENTICATION");
         UserDetails userDetails = userDetailsService.loadUserByUsername(this.getAccount(token));
-        System.out.println(userDetails.getUsername());
-        System.out.println(userDetails.getAuthorities());
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
@@ -74,7 +88,7 @@ public class JwtProvider {
     }
 
     // 토큰 검증
-    public boolean validateToken(String token) {
+    public boolean validateAccessToken(String token) {
         try {
             // Bearer 검증
             if (!token.substring(0, "BEARER ".length()).equalsIgnoreCase("BEARER ")) {
@@ -88,5 +102,25 @@ public class JwtProvider {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public String validateRefreshToken(String refreshToken){
+        try {
+            // 검증
+            Jws<Claims> claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(refreshToken);
+
+            if (!claims.getBody().getExpiration().before(new Date())) {
+                return createAccessToken(claims.getBody().get("sub").toString(),
+                        (List<Authority>) claims.getBody().get("roles"));
+            }
+        }catch (ExpiredJwtException e) {
+            log.error("Refresh Token expired", e);
+            throw new RuntimeException(e.getMessage());
+        }
+
+        return null;
     }
 }

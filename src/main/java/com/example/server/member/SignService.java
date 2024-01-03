@@ -40,14 +40,14 @@ public class SignService {
             throw new BadCredentialsException("잘못된 계정정보입니다.");
         }
 
-        log.info("login device token: {}", request.getDeviceToken());
-        redisClient.deviceTokenPut(request.getAccount(), request.getDeviceToken());
+        redisClient.tokenPut(request.getAccount(), request.getDeviceToken());
 
         Map<String, Object> resultMap = new HashMap<>();
         Map<String, Object> userInfo = mapper.convertValue(member, Map.class);
         userInfo.remove("password");
         resultMap.put("userInfo", userInfo);
-        resultMap.put("token", jwtProvider.createToken(member.getAccount(), member.getRoles()));
+        resultMap.put("accessToken", jwtProvider.createAccessToken(member.getAccount(), member.getRoles()));
+        resultMap.put("refreshToken", jwtProvider.createRefreshToken(member.getAccount(), member.getRoles()));
         return CommonResponse.builder()
                 .resultCode(CodeConst.SUCCESS_CODE)
                 .resultMessage(CodeConst.SUCCESS_MESSAGE)
@@ -142,5 +142,4 @@ public class SignService {
                 .data(resultMap)
                 .build();
     }
-
 }
