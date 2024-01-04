@@ -3,8 +3,8 @@ package com.example.server.common;
 public class CodeConst {
 
     // 성공 공통 코드
-    public static final String SUCCESS_CODE                                     = "200";
-    public static final String SUCCESS_MESSAGE                                  = "REQUEST PROCESSED SUCCESSFULLY";
+    public static final String SUCCESS_CODE = "200";
+    public static final String SUCCESS_MESSAGE = "REQUEST PROCESSED SUCCESSFULLY";
 
     // 계정 없음
     public static final String MEMBER_NOT_FOUND_CODE = "404";
@@ -19,7 +19,7 @@ public class CodeConst {
     public static final String DUPLICATED_NICKNAME_MESSAGE = "DUPLICATED NICKNAME";
 
     // refresh token 만료
-    public static final String REQUIRED_LOGIN_CODE = "401";
+    public static final String REQUIRED_LOGIN_CODE = "403";
     public static final String REQUIRED_LOGIN_MESSAGE = "REQUIRED LOGIN";
 
     // access token 발급 성공

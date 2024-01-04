@@ -105,20 +105,14 @@ public class JwtProvider {
     }
 
     public String validateRefreshToken(String refreshToken){
-        try {
-            // 검증
-            Jws<Claims> claims = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
-                    .build()
-                    .parseClaimsJws(refreshToken);
+        Jws<Claims> claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(refreshToken);
 
-            if (!claims.getBody().getExpiration().before(new Date())) {
-                return createAccessToken(claims.getBody().get("sub").toString(),
-                        (List<Authority>) claims.getBody().get("roles"));
-            }
-        }catch (ExpiredJwtException e) {
-            log.error("Refresh Token expired", e);
-            throw new RuntimeException(e.getMessage());
+        if (!claims.getBody().getExpiration().before(new Date())) {
+            return createAccessToken(claims.getBody().get("sub").toString(),
+                    (List<Authority>) claims.getBody().get("roles"));
         }
 
         return null;
