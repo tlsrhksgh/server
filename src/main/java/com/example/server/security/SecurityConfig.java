@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/register", "/login", "/**/exists/**", "/ws/**", "/verify-code")
+                .antMatchers("/register", "/login", "/**/exists/**", "/ws/**", "/verify-code", "/refresh")
                 .permitAll()
                 .antMatchers("/admin/**")
                 .hasRole("ADMIN")
