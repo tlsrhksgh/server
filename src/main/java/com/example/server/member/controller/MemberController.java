@@ -16,7 +16,7 @@ public class MemberController {
     private final MemberService memberService;
 
     @GetMapping(value = "/info")
-    public ResponseEntity<CommonResponse> signIn(Authentication authentication) throws Exception {
+    public ResponseEntity<CommonResponse> signIn(Authentication authentication) {
         return new ResponseEntity<>(memberService.getInfo(authentication), HttpStatus.OK);
     }
 

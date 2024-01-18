@@ -1,8 +1,13 @@
 package com.example.server.security;
 
 import com.example.server.member.Authority;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
+import io.netty.util.Signal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +23,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,11 +33,11 @@ public class JwtProvider {
 
     private Key secretKey;
 
-    // 만료시간 : 1Minutes
-    private final long ACCESS_EXPIRATION_TIME = 1000L * 60;
-
     // 만료시간 : 24Hour
-    private final long REFRESH_EXPIRATION_TIME = 24 * 60 * 60 * 1000L;
+    private final long ACCESS_EXPIRATION_TIME = 24 * 60 * 60 * 1000L;
+
+    // 만료시간 : 1Week
+    private final long REFRESH_EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000L;
 
     private final RedisTemplate redisTemplate;
     private final JpaUserDetailsService userDetailsService;
@@ -105,13 +109,18 @@ public class JwtProvider {
     }
 
     public String validateRefreshToken(String refreshToken){
-        Jws<Claims> claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(refreshToken);
+        Jws<Claims> claims;
+        try {
+            claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(refreshToken);
+        } catch (SignatureException e) {
+            return "jwt error";
+        }
 
         if (!claims.getBody().getExpiration().before(new Date())) {
-            return createAccessToken(claims.getBody().get("sub").toString(),
+            return createRefreshToken(claims.getBody().get("sub").toString(),
                     (List<Authority>) claims.getBody().get("roles"));
         }
 
