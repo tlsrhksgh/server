@@ -31,7 +31,7 @@ public class SignController {
 
         CommonResponse commonResponse;
 
-        if(Objects.isNull(reIssuedAccessToken)) {
+        if(Objects.isNull(reIssuedAccessToken) || reIssuedAccessToken.equals("jwt error")) {
             commonResponse = CommonResponse.builder()
                     .resultCode(CodeConst.REQUIRED_LOGIN_CODE)
                     .resultMessage(CodeConst.REQUIRED_LOGIN_MESSAGE)
