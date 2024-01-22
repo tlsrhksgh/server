@@ -1,5 +1,6 @@
-package com.example.server.member;
+package com.example.server.member.repository;
 
+import com.example.server.member.repository.Member;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

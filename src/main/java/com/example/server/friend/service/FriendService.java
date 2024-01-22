@@ -6,9 +6,9 @@ import com.example.server.friend.Friend;
 import com.example.server.friend.dto.FriendInterface;
 import com.example.server.friend.dto.FriendRequestDto;
 import com.example.server.friend.repository.FriendRepository;
-import com.example.server.member.CustomMemberRepository;
-import com.example.server.member.Member;
-import com.example.server.member.MemberRepository;
+import com.example.server.member.repository.CustomMemberRepository;
+import com.example.server.member.repository.Member;
+import com.example.server.member.repository.MemberRepository;
 import com.example.server.push.contatns.PushCategory;
 import com.example.server.push.service.PushService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -176,7 +176,6 @@ public class FriendService {
         Member currentUser = customMemberRepository.findMemberByAccount(authentication.getName());
         try {
             List<FriendInterface> result = friendRepository.selectFriendList(currentUser.getNickname());
-            ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> resultMap = new HashMap<>();
             resultMap.put("list", result);
             log.info("FriendService - getFriendList : SUCCESS => " + result.size());

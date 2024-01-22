@@ -3,9 +3,10 @@ package com.example.server.member.service;
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
 import com.example.server.file.FileService;
-import com.example.server.member.CustomMemberRepository;
-import com.example.server.member.Member;
-import com.example.server.member.MemberRepository;
+import com.example.server.member.repository.CustomMemberRepository;
+import com.example.server.member.repository.Member;
+import com.example.server.member.repository.MemberRepository;
+import com.example.server.member.dto.FindPasswordRequest;
 import com.example.server.member.dto.UpdateRequest;
 import com.example.server.promise.PromiseMember;
 import com.example.server.promise.service.PromiseService;
@@ -16,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +72,7 @@ public class MemberService {
             }
         }
 
-        if(Objects.nonNull(request.getPassword())) {
+        if(StringUtils.hasText(request.getPassword())) {
             request.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
@@ -85,6 +87,26 @@ public class MemberService {
                 .resultCode(CodeConst.SUCCESS_CODE)
                 .resultMessage(CodeConst.SUCCESS_MESSAGE)
                 .data(updateImgMap)
+                .build();
+    }
+
+    public CommonResponse updateMemberPassword(FindPasswordRequest request) {
+        if(StringUtils.hasText(request.getPassword())) {
+            request.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        long result = customMemberRepository.updateMemberPasswordByAccount(request.getPassword(), request.getAccount());
+
+        if(result == 0) {
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.MEMBER_NOT_FOUND_CODE)
+                    .resultMessage(CodeConst.MEMBER_NOT_FOUND_MESSAGE)
+                    .build();
+        }
+
+        return CommonResponse.builder()
+                .resultCode(CodeConst.SUCCESS_CODE)
+                .resultMessage(CodeConst.SUCCESS_MESSAGE)
                 .build();
     }
 

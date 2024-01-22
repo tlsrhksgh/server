@@ -1,4 +1,4 @@
-package com.example.server.member;
+package com.example.server.member.repository;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

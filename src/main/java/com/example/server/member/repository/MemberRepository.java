@@ -1,4 +1,4 @@
-package com.example.server.member;
+package com.example.server.member.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

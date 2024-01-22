@@ -1,6 +1,6 @@
 package com.example.server.chat.handler;
 
-import com.example.server.member.MemberRepository;
+import com.example.server.member.repository.MemberRepository;
 import com.example.server.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +28,6 @@ public class SocketHandler implements ChannelInterceptor {
         if(StompCommand.CONNECT.equals(accessor.getCommand())) {
             log.info("웹소켓 연결 요청");
             String jwtToken = accessor.getFirstNativeHeader("Authorization");
-
-            if(!jwtProvider.validateAccessToken(jwtToken)) {
-                throw new RuntimeException("로그인이 필요합니다.");
-            }
 
             String account = jwtProvider.getAccount(jwtToken.split(" ")[1].trim());
             if(Objects.nonNull(account)) {

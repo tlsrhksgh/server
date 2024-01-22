@@ -2,7 +2,7 @@ package com.example.server.chat.service;
 
 import com.example.server.chat.constants.DeleteRoomType;
 import com.example.server.common.CommonResponse;
-import com.example.server.member.Member;
+import com.example.server.member.repository.Member;
 import com.example.server.promise.Promise;
 
 import java.util.List;

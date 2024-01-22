@@ -1,7 +1,7 @@
 package com.example.server.file;
 
-import com.example.server.member.Member;
-import com.example.server.member.MemberRepository;
+import com.example.server.member.repository.Member;
+import com.example.server.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

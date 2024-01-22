@@ -1,4 +1,4 @@
-package com.example.server.member;
+package com.example.server.member.service;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
@@ -6,6 +6,9 @@ import com.example.server.common.client.RedisClient;
 import com.example.server.file.FileService;
 import com.example.server.member.component.MailComponent;
 import com.example.server.member.dto.SignRequest;
+import com.example.server.member.repository.Authority;
+import com.example.server.member.repository.Member;
+import com.example.server.member.repository.MemberRepository;
 import com.example.server.security.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
