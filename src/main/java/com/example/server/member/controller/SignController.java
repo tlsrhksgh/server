@@ -1,7 +1,8 @@
-package com.example.server.member;
+package com.example.server.member.controller;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
+import com.example.server.member.service.SignService;
 import com.example.server.member.dto.SignRequest;
 import com.example.server.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,10 @@ public class SignController {
 
     @PostMapping(value = "/login")
     public ResponseEntity<CommonResponse> signin(@RequestBody SignRequest request) {
-        return ResponseEntity.ok(signService.login(request));
+        CommonResponse response = signService.login(request);
+
+        return ResponseEntity.status(Integer.parseInt(response.getResultCode()))
+                .body(response);
     }
 
     @PostMapping("/refresh")
@@ -63,6 +67,7 @@ public class SignController {
 
     @GetMapping("/{account}/exists/account")
     public ResponseEntity<CommonResponse> checkAccountDuplicate(@PathVariable String account) {
+
         return ResponseEntity.ok(signService.checkAccountDuplicate(account));
     }
 

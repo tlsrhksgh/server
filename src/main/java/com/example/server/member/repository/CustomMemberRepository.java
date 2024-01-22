@@ -1,4 +1,4 @@
-package com.example.server.member;
+package com.example.server.member.repository;
 
 import com.example.server.member.dto.UpdateRequest;
 import com.example.server.promise.PromiseMember;
@@ -98,5 +98,15 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
                 oldNickname, newNickname,
                 newNickname, newPassword,
                 member.getMemberId());
+    }
+
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    public long updateMemberPasswordByAccount(String password, String account) {
+        return queryFactory
+                .update(member)
+                .set(member.password, password)
+                .where(member.account.eq(account))
+                .execute();
     }
 }

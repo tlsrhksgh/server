@@ -1,7 +1,7 @@
 package com.example.server.member.dto;
 
-import com.example.server.member.Authority;
-import com.example.server.member.Member;
+import com.example.server.member.repository.Authority;
+import com.example.server.member.repository.Member;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 

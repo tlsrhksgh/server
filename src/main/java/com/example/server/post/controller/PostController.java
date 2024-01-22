@@ -16,12 +16,18 @@ public class PostController {
 
     @PostMapping("/inquiry")
     public ResponseEntity<CommonResponse> savePost(@RequestBody PostSaveRequest saveRequest) {
-        return ResponseEntity.ok(postService.savePost(saveRequest));
+        CommonResponse response = postService.savePost(saveRequest);
+
+        return ResponseEntity.status(Integer.parseInt(response.getResultCode()))
+                .body(response);
     }
 
     @PostMapping("/inquiry/reply")
     public ResponseEntity<CommonResponse> saveReply(@RequestBody ReplySaveRequest saveRequest) {
-        return ResponseEntity.ok(postService.saveReply(saveRequest));
+        CommonResponse response = postService.saveReply(saveRequest);
+
+        return ResponseEntity.status(Integer.parseInt(response.getResultCode()))
+                .body(response);
     }
 
     @GetMapping("/inquiry/list/{account}")

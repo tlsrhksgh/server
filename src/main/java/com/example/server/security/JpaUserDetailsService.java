@@ -1,8 +1,7 @@
 package com.example.server.security;
 
-import com.example.server.member.CustomMemberRepository;
-import com.example.server.member.Member;
-import com.example.server.member.MemberRepository;
+import com.example.server.member.repository.CustomMemberRepository;
+import com.example.server.member.repository.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

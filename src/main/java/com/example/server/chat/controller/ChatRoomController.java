@@ -23,6 +23,9 @@ public class ChatRoomController {
 
     @GetMapping("/{roomId}")
     public ResponseEntity<CommonResponse> chatRoomDetail(@PathVariable Long roomId, Authentication authentication) {
-        return ResponseEntity.ok(chatRoomService.findChatRoomDetail(roomId, authentication.getName()));
+        CommonResponse response = chatRoomService.findChatRoomDetail(roomId, authentication.getName());
+
+        return ResponseEntity.status(Integer.parseInt(response.getResultCode()))
+                .body(response);
     }
 }

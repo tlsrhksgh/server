@@ -1,6 +1,5 @@
 package com.example.server.security;
 
-import com.example.server.member.CustomMemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +42,8 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/register", "/login", "/**/exists/**", "/ws/**", "/verify-code", "/refresh")
+                .antMatchers("/register", "/login", "/**/exists/**", "/ws/**", "/verify-code", "/refresh",
+                        "/member/find-password")
                 .permitAll()
                 .antMatchers("/admin/**")
                 .hasRole("ADMIN")
@@ -59,6 +59,7 @@ public class SecurityConfig {
                     response.setContentType("application/json; charset=UTF-8");
                     Map<String, Object> responseMap = new HashMap<>();
                     responseMap.put("resultCode", 403);
+
                     responseMap.put("resultMessage", "권한이 없는 사용자입니다.");
                     response.getWriter().write(objectMapper.writeValueAsString(responseMap));
                 })

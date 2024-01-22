@@ -1,6 +1,6 @@
 package com.example.server.security;
 
-import com.example.server.member.Member;
+import com.example.server.member.repository.Member;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

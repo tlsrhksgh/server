@@ -1,14 +1,11 @@
 package com.example.server.member.dto;
 
 import lombok.Getter;
-import org.springframework.web.multipart.MultipartFile;
 
 @Getter
-public class UpdateRequest {
-    private String nickname;
+public class FindPasswordRequest {
+    private String account;
     private String password;
-    private MultipartFile img;
-    private boolean imgUpdate;
 
     public void setPassword(String password) {
         this.password = password;

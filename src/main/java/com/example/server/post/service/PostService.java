@@ -2,8 +2,8 @@ package com.example.server.post.service;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
-import com.example.server.member.CustomMemberRepository;
-import com.example.server.member.Member;
+import com.example.server.member.repository.CustomMemberRepository;
+import com.example.server.member.repository.Member;
 import com.example.server.post.domain.Post;
 import com.example.server.post.domain.Reply;
 import com.example.server.post.domain.constants.PostStatusType;
