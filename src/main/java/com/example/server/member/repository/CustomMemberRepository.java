@@ -102,7 +102,7 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
 
     @Transactional
     @Modifying(clearAutomatically = true)
-    public long updateMemberPasswordByAccount(String password, String account) {
+    public long updateMemberPassword(String password, String account) {
         return queryFactory
                 .update(member)
                 .set(member.password, password)

@@ -95,7 +95,7 @@ public class MemberService {
             request.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
-        long result = customMemberRepository.updateMemberPasswordByAccount(request.getPassword(), request.getAccount());
+        long result = customMemberRepository.updateMemberPassword(request.getPassword(), request.getAccount());
 
         if(result == 0) {
             return CommonResponse.builder()

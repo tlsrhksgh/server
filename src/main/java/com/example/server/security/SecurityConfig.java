@@ -1,6 +1,11 @@
 package com.example.server.security;
 
+import com.example.server.member.handler.OAuthAuthenticationSuccessHandler;
+import com.example.server.member.service.CustomOAuth2UserService;
+import com.example.server.security.handler.CustomAccessDeniedHandler;
+import com.example.server.security.handler.CustomAuthenticationEntryPoint;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -23,7 +29,10 @@ import java.util.Map;
 @EnableWebSecurity
 public class SecurityConfig {
     private final JwtProvider jwtProvider;
-    private final ObjectMapper objectMapper;
+    private final CustomAccessDeniedHandler deniedHandler;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuthAuthenticationSuccessHandler successHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -53,25 +62,20 @@ public class SecurityConfig {
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
-                .accessDeniedHandler((request, response, accessDeniedException) -> {
-                    response.setStatus(403);
-                    response.setCharacterEncoding("utf-8");
-                    response.setContentType("application/json; charset=UTF-8");
-                    Map<String, Object> responseMap = new HashMap<>();
-                    responseMap.put("resultCode", 403);
-
-                    responseMap.put("resultMessage", "권한이 없는 사용자입니다.");
-                    response.getWriter().write(objectMapper.writeValueAsString(responseMap));
-                })
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(401);
-                    response.setCharacterEncoding("utf-8");
-                    response.setContentType("application/json; charset=UTF-8");
-                    Map<String, Object> responseMap = new HashMap<>();
-                    responseMap.put("resultCode", 401);
-                    responseMap.put("resultMessage", "인증되지 않은 사용자입니다.");
-                    response.getWriter().write(objectMapper.writeValueAsString(responseMap));
-                });
+                .accessDeniedHandler(deniedHandler)
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .and()
+                .oauth2Login()
+                .authorizationEndpoint()
+                .baseUri("/oauth2/authorize")
+                .and()
+                .redirectionEndpoint()
+                .baseUri("/login/oauth2/code/*")
+                .and()
+                .userInfoEndpoint()
+                .userService(customOAuth2UserService)
+                .and()
+                .successHandler(successHandler);
 
         return http.build();
     }
