@@ -7,6 +7,7 @@ import com.example.server.file.FileService;
 import com.example.server.member.component.MailComponent;
 import com.example.server.member.dto.SignRequest;
 import com.example.server.member.repository.Authority;
+import com.example.server.member.repository.CustomMemberRepository;
 import com.example.server.member.repository.Member;
 import com.example.server.member.repository.MemberRepository;
 import com.example.server.security.JwtProvider;
@@ -27,6 +28,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class SignService {
     private final MemberRepository memberRepository;
+    private final CustomMemberRepository customMemberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final MailComponent mailComponent;
@@ -36,11 +38,20 @@ public class SignService {
 
     // 로그인
     public CommonResponse login(SignRequest request) {
-        Member member = memberRepository.findByAccount(request.getAccount()).orElseThrow(() ->
-                new BadCredentialsException("잘못된 계정정보입니다."));
+        Member member = customMemberRepository.findMemberByAccount(request.getAccount());
+
+        if(Objects.isNull(member)) {
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.LOGIN_FAIL_ID_CODE)
+                    .resultMessage(CodeConst.LOGIN_FAIL_ID_MESSAGE)
+                    .build();
+        }
 
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
-            throw new BadCredentialsException("잘못된 계정정보입니다.");
+            return CommonResponse.builder()
+                    .resultCode(CodeConst.LOGIN_FAIL_PW_CODE)
+                    .resultMessage(CodeConst.LOGIN_FAIL_PW_MESSAGE)
+                    .build();
         }
 
         redisClient.tokenPut(request.getAccount(), request.getDeviceToken());

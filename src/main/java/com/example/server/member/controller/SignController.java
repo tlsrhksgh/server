@@ -2,6 +2,7 @@ package com.example.server.member.controller;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
+import com.example.server.member.service.CustomOAuth2UserService;
 import com.example.server.member.service.SignService;
 import com.example.server.member.dto.SignRequest;
 import com.example.server.security.JwtProvider;
@@ -19,6 +20,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class SignController {
     private final SignService signService;
+    private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtProvider jwtProvider;
 
     @PostMapping(value = "/login")
@@ -40,7 +42,9 @@ public class SignController {
                     .resultCode(CodeConst.REQUIRED_LOGIN_CODE)
                     .resultMessage(CodeConst.REQUIRED_LOGIN_MESSAGE)
                     .build();
-            return ResponseEntity.badRequest().body(commonResponse);
+
+            return ResponseEntity.status(Integer.parseInt(commonResponse.getResultCode()))
+                    .body(commonResponse);
         }
 
         Map<String, Object> resultMap = new HashMap<>();
@@ -57,12 +61,10 @@ public class SignController {
 
     @PostMapping(value = "/register")
     public ResponseEntity<CommonResponse> signup(@ModelAttribute SignRequest request) throws Exception {
-        return ResponseEntity.ok(signService.register(request));
-    }
+        CommonResponse response = signService.register(request);
 
-    @PostMapping(value = "/login/oauth")
-    public ResponseEntity<CommonResponse> oAuthSignInOrSignUp(@RequestBody SignRequest request) throws Exception {
-        return ResponseEntity.ok(signService.register(request));
+        return ResponseEntity.status(Integer.parseInt(response.getResultCode()))
+                .body(response);
     }
 
     @GetMapping("/{account}/exists/account")
