@@ -12,8 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Set;
 
-import static com.example.server.member.QAuthority.authority;
-import static com.example.server.member.QMember.member;
+import static com.example.server.member.repository.QAuthority.authority;
+import static com.example.server.member.repository.QMember.member;
 import static com.example.server.promise.QPromiseMember.promiseMember;
 
 

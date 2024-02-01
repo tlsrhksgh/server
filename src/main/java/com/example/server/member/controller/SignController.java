@@ -2,6 +2,7 @@ package com.example.server.member.controller;
 
 import com.example.server.common.CodeConst;
 import com.example.server.common.CommonResponse;
+import com.example.server.member.dto.OAuthLoginRequest;
 import com.example.server.member.service.CustomOAuth2UserService;
 import com.example.server.member.service.SignService;
 import com.example.server.member.dto.SignRequest;
@@ -23,7 +24,7 @@ public class SignController {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtProvider jwtProvider;
 
-    @PostMapping(value = "/login")
+    @PostMapping("/login")
     public ResponseEntity<CommonResponse> signin(@RequestBody SignRequest request) {
         CommonResponse response = signService.login(request);
 
@@ -59,7 +60,12 @@ public class SignController {
         return ResponseEntity.ok(commonResponse);
     }
 
-    @PostMapping(value = "/register")
+    @PostMapping("/login/oauth")
+    public ResponseEntity<CommonResponse> oauthLogin(@RequestBody OAuthLoginRequest request) {
+        return ResponseEntity.ok(customOAuth2UserService.login(request.getProvider(), request.getAccessToken()));
+    }
+
+    @PostMapping("/register")
     public ResponseEntity<CommonResponse> signup(@ModelAttribute SignRequest request) throws Exception {
         CommonResponse response = signService.register(request);
 

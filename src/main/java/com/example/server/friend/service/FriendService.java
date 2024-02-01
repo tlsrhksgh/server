@@ -99,12 +99,7 @@ public class FriendService {
                     resultList.add(info);
                 }
             }
-            if (resultList.isEmpty()) {
-                resultMap.put("info", "FRIEND REQUEST DOES NOT EXIST");
-            }
-            else {
-                resultMap.put("info", resultList);
-            }
+            resultMap.put("info", resultList);
             log.info("FriendService - selectRequestList : SUCCESS => " + requestList.size());
             return CommonResponse.builder()
                     .resultCode(CodeConst.SUCCESS_CODE)

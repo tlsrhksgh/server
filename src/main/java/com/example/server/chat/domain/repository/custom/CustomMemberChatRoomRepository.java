@@ -1,6 +1,7 @@
 package com.example.server.chat.domain.repository.custom;
 
 import com.example.server.chat.domain.model.entity.ChatRoom;
+import com.example.server.chat.domain.model.entity.MemberChatRoom;
 import com.example.server.chat.domain.repository.dto.ChatRoomListResponse;
 import com.example.server.chat.domain.repository.dto.QChatRoomListResponse;
 import com.querydsl.core.types.ExpressionUtils;
@@ -18,6 +19,7 @@ import static com.example.server.chat.domain.model.entity.QMemberChatRoom.member
 import static com.example.server.promise.QPromiseMember.promiseMember;
 
 @Repository
+@Transactional(readOnly = true)
 public class CustomMemberChatRoomRepository extends QuerydslRepositorySupport {
     private final JPAQueryFactory queryFactory;
 
@@ -26,7 +28,6 @@ public class CustomMemberChatRoomRepository extends QuerydslRepositorySupport {
         this.queryFactory = queryFactory;
     }
 
-    @Transactional(readOnly = true)
     public List<ChatRoomListResponse> findAllChatRoomByAccount(String nickname) {
         return queryFactory
                 .select(new QChatRoomListResponse(
@@ -52,6 +53,14 @@ public class CustomMemberChatRoomRepository extends QuerydslRepositorySupport {
                         .and(promiseMember.accepted.eq("Y")))
                 .groupBy(memberChatRoom.chatRoom().id)
                 .orderBy(chatMessage.sentDate.max().desc())
+                .fetch();
+    }
+
+    @Transactional
+    public List<MemberChatRoom> findParticipatedMembers(Long roomId) {
+        return queryFactory
+                .selectFrom(memberChatRoom)
+                .where(memberChatRoom.chatRoom().id.eq(roomId))
                 .fetch();
     }
 
