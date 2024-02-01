@@ -23,7 +23,7 @@ import static com.example.server.push.contatns.PushCategory.*;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PushService<T extends ApnsPushNotification> {
+public class PushService {
     private final RedisClient redisClient;
     private final ApnsClient apnsClient;
 
@@ -79,14 +79,23 @@ public class PushService<T extends ApnsPushNotification> {
             payloadBuilder.setAlertTitle("친구 요청");
             payloadBuilder.setCategoryName(pushCategory.name());
             payloadBuilder.setAlertSubtitle("Plameet");
+            payloadBuilder.setContentAvailable(true);
             payloadBuilder.setSound("default");
             payloadBuilder.setAlertBody("친구 요청이 왔어요 확인해 주세요");
         } else if(pushCategory.equals(PROMISE_REQUEST)) {
             payloadBuilder.setAlertTitle("약속 요청");
             payloadBuilder.setCategoryName(pushCategory.name());
             payloadBuilder.setAlertSubtitle("Plameet");
+            payloadBuilder.setContentAvailable(true);
             payloadBuilder.setSound("default");
             payloadBuilder.setAlertBody("새로운 약속 요청이 왔어요 확인해 주세요");
+        } else if(pushCategory.equals(CHAT_MESSAGE_NOTIFICATION)) {
+            payloadBuilder.setAlertTitle("새 메시지");
+            payloadBuilder.setCategoryName(pushCategory.name());
+            payloadBuilder.setAlertSubtitle("Plameet");
+            payloadBuilder.setContentAvailable(true);
+            payloadBuilder.setSound("default");
+            payloadBuilder.setAlertBody("새로운 메시지가 도착했어요 확인해 주세요");
         }
 
         return payloadBuilder.build();

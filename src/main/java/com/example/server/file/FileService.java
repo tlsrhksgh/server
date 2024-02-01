@@ -5,6 +5,7 @@ import com.example.server.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
@@ -22,7 +23,7 @@ public class FileService {
 
     @Transactional
     public String memberImgFileUpload(MultipartFile file) {
-        if(Objects.isNull(file)) {
+        if(Objects.isNull(file) || StringUtils.hasText(file.getName())) {
             return null;
         }
 

@@ -55,6 +55,7 @@ public class SignService {
         }
 
         redisClient.tokenPut(request.getAccount(), request.getDeviceToken());
+        log.info("deviceToken: " + redisClient.getDeviceToken(request.getAccount()));
 
         Map<String, Object> resultMap = new HashMap<>();
         Map<String, Object> userInfo = mapper.convertValue(member, Map.class);
