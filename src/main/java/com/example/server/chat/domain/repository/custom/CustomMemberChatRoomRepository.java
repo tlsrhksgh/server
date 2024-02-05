@@ -16,6 +16,8 @@ import java.util.List;
 
 import static com.example.server.chat.domain.model.entity.QChatMessage.chatMessage;
 import static com.example.server.chat.domain.model.entity.QMemberChatRoom.memberChatRoom;
+import static com.example.server.member.repository.QMember.member;
+import static com.example.server.chat.domain.model.entity.QChatRoom.chatRoom;
 import static com.example.server.promise.QPromiseMember.promiseMember;
 
 @Repository
@@ -54,6 +56,20 @@ public class CustomMemberChatRoomRepository extends QuerydslRepositorySupport {
                 .groupBy(memberChatRoom.chatRoom().id)
                 .orderBy(chatMessage.sentDate.max().desc())
                 .fetch();
+    }
+
+    public Long findMemberChatRoomByPromiseIdAndNickname(Long promiseId, String memberNickname) {
+        return queryFactory
+                .select(memberChatRoom.count())
+                .from(memberChatRoom)
+                .innerJoin(member)
+                .on(memberChatRoom.member().eq(member))
+                .innerJoin(chatRoom)
+                .on(memberChatRoom.chatRoom().eq(chatRoom))
+                .where(memberChatRoom.member().nickname.eq(memberNickname)
+                        .and(memberChatRoom.chatRoom().promiseId.eq(promiseId))
+                )
+                .fetchOne();
     }
 
     @Transactional

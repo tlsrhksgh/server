@@ -66,7 +66,7 @@ public class PromiseService {
             if(!members.isEmpty()) {
                 memberList = customMemberRepository.findMembersByNicknames(memberNicknames);
                 for (Member member : memberList) {
-                    pushService.makeAndSendPushNotification(PushCategory.PROMISE_REQUEST, member.getAccount());
+                    pushService.makeAndSendPushNotification(PushCategory.PROMISE_REQUEST, member.getAccount(), null);
                 }
             }
 
@@ -332,10 +332,10 @@ public class PromiseService {
     public CommonResponse inviteFriend(HashMap<String, Object> request) throws Exception {
         log.info("PromiseService - inviteFriend : START");
         ObjectMapper mapper = new ObjectMapper();
-        List<Map<String, String>> members = mapper.convertValue(request.get("members"), List.class);
+        List members = mapper.convertValue(request.get("members"), List.class);
         try {
-            for (Map<String, String> info : members) {
-                String nickname = info.get("nickname");
+            for (Object info : members) {
+                String nickname = (String) info;
                 if (promiseMemberRepository.countByPromiseIdAndNickname(mapper.convertValue(request.get("promiseId"), Long.class), nickname) > 0) {
                     // 이미 요청이 되었거나 멤버임
                     log.info("PromiseService - inviteFriend : FAIL");
@@ -344,15 +344,19 @@ public class PromiseService {
                             .resultMessage(CodeConst.INVITE_FRIEND_FAIL_MESSAGE)
                             .build();
                 } else {
-                    Promise promise = promiseRepository.findById(mapper.convertValue(request.get("promiseId"), Long.class)).get();
-                    PromiseMember friend = PromiseMember.builder().accepted("N").nickname(nickname).build();
-                    Member member = customMemberRepository.findMemberByNickname(nickname);
+                    Promise promise = promiseRepository.findById(mapper.convertValue(request.get("promiseId"), Long.class))
+                            .orElse(null);
 
-                    friend.setPromise(promise);
-                    promise.getMembers().add(friend);
-                    pushService.makeAndSendPushNotification(PushCategory.PROMISE_REQUEST, member.getAccount());
+                    if(Objects.nonNull(promise)) {
+                        PromiseMember friend = PromiseMember.builder().accepted("N").nickname(nickname).build();
+                        Member member = customMemberRepository.findMemberByNickname(nickname);
 
-                    promiseRepository.save(promise);
+                        friend.setPromise(promise);
+                        promise.getMembers().add(friend);
+                        pushService.makeAndSendPushNotification(PushCategory.PROMISE_REQUEST, member.getAccount(), null);
+
+                        promiseRepository.save(promise);
+                    }
                 }
             }
             log.info("PromiseService - inviteFriend : SUCCESS");

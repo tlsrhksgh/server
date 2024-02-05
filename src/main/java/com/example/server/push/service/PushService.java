@@ -1,13 +1,13 @@
 package com.example.server.push.service;
 
 import com.eatthepath.pushy.apns.ApnsClient;
-import com.eatthepath.pushy.apns.ApnsPushNotification;
 import com.eatthepath.pushy.apns.PushNotificationResponse;
 import com.eatthepath.pushy.apns.util.ApnsPayloadBuilder;
 import com.eatthepath.pushy.apns.util.SimpleApnsPayloadBuilder;
 import com.eatthepath.pushy.apns.util.SimpleApnsPushNotification;
 import com.eatthepath.pushy.apns.util.TokenUtil;
 import com.eatthepath.pushy.apns.util.concurrent.PushNotificationFuture;
+import com.example.server.chat.service.dto.ChatMessageForm;
 import com.example.server.common.client.RedisClient;
 import com.example.server.push.contatns.PushCategory;
 import lombok.RequiredArgsConstructor;
@@ -30,11 +30,11 @@ public class PushService {
     @Value("${apple.bundle-id}")
     private String bundleId;
 
-    public void makeAndSendPushNotification(PushCategory pushCategory, String account) {
+    public void makeAndSendPushNotification(PushCategory pushCategory, String account, Object form) {
         String deviceToken = redisClient.getDeviceToken(account);
 
         if(Objects.nonNull(deviceToken)) {
-            String payload = makePayload(pushCategory);
+            String payload = makePayload(pushCategory, form);
             String token = TokenUtil.sanitizeTokenString(redisClient.getDeviceToken(account));
 
             SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(token, bundleId, payload);
@@ -72,7 +72,7 @@ public class PushService {
         log.info("푸쉬 완료까지 소요된 시간: " + (endTime - startTime) + "ms");
     }
 
-    private String makePayload(PushCategory pushCategory) {
+    private String makePayload(PushCategory pushCategory, Object customApnsBuilderForm) {
         ApnsPayloadBuilder payloadBuilder = new SimpleApnsPayloadBuilder();
 
         if(pushCategory.equals(FRIEND_REQUEST)) {
@@ -90,12 +90,17 @@ public class PushService {
             payloadBuilder.setSound("default");
             payloadBuilder.setAlertBody("새로운 약속 요청이 왔어요 확인해 주세요");
         } else if(pushCategory.equals(CHAT_MESSAGE_NOTIFICATION)) {
+            ChatMessageForm message = (ChatMessageForm) customApnsBuilderForm;
+            log.info(message.getMessage());
+
             payloadBuilder.setAlertTitle("새 메시지");
             payloadBuilder.setCategoryName(pushCategory.name());
             payloadBuilder.setAlertSubtitle("Plameet");
-            payloadBuilder.setContentAvailable(true);
+            payloadBuilder.setMutableContent(true);
             payloadBuilder.setSound("default");
-            payloadBuilder.setAlertBody("새로운 메시지가 도착했어요 확인해 주세요");
+            payloadBuilder.addCustomProperty("nickname", message.getSenderNickname());
+            payloadBuilder.addCustomProperty("imageUrl", message.getMemberImg());
+            payloadBuilder.setAlertBody(message.getMessage());
         }
 
         return payloadBuilder.build();

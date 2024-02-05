@@ -62,7 +62,7 @@ public class FriendService {
                 friendRepository.save(friend);
 
                 Member member = customMemberRepository.findMemberByNickname(request.getRespondent());
-                pushService.makeAndSendPushNotification(PushCategory.FRIEND_REQUEST, member.getAccount());
+                pushService.makeAndSendPushNotification(PushCategory.FRIEND_REQUEST, member.getAccount(), null);
 
                 log.info("FriendService - addRequest : SUCCESS");
                 return CommonResponse.builder()

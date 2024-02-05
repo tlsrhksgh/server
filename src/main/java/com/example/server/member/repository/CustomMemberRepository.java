@@ -18,6 +18,7 @@ import static com.example.server.promise.QPromiseMember.promiseMember;
 
 
 @Repository
+@Transactional(readOnly = true)
 public class CustomMemberRepository extends QuerydslRepositorySupport {
     private final JPAQueryFactory queryFactory;
     private final JdbcTemplate jdbcTemplate;
@@ -28,7 +29,6 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Transactional(readOnly = true)
     public Member findMemberByAccount(String account) {
         return queryFactory
                 .selectFrom(member)
@@ -38,7 +38,6 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
                 .fetchOne();
     }
 
-    @Transactional(readOnly = true)
     public Member findMemberByNickname(String nickname) {
         return queryFactory
                 .selectFrom(member)
@@ -48,7 +47,6 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
                 .fetchOne();
     }
 
-    @Transactional(readOnly = true)
     public List<PromiseMember> findAllParticipatedPromiseByNickname(String nickname) {
         return queryFactory
                 .selectFrom(promiseMember)

@@ -125,10 +125,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     @Transactional
     public void inviteMembersToChatRoom(Long promiseId, String memberNickname) {
-        ChatRoom chatRoom = chatRoomRepository.findByPromiseId(promiseId);
-        Member member = customMemberRepository.findMemberByNickname(memberNickname);
+        Long countMemberChatRoom = customMemberChatRoomRepository.
+                findMemberChatRoomByPromiseIdAndNickname(promiseId, memberNickname);
 
-        if(Objects.nonNull(chatRoom) && Objects.nonNull(member)) {
+        if(countMemberChatRoom == 0) {
+            ChatRoom chatRoom = chatRoomRepository.findByPromiseId(promiseId);
+            Member member = customMemberRepository.findMemberByNickname(memberNickname);
+
             memberChatRoomRepository.save(
                     MemberChatRoom.builder()
                             .member(member)

@@ -11,7 +11,6 @@ import com.example.server.push.service.PushService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,7 +26,7 @@ public class ChatService {
         List<MemberChatRoom> memberChatRooms = customMemberChatRoomRepository
                 .findParticipatedMembers(form.getRoomId());
 
-        if(Objects.isNull(memberChatRooms)) {
+        if(memberChatRooms.size() == 0) {
             throw new RuntimeException("존재하지 않는 채팅방이므로 메시지를 전송할 수 없습니다.");
         }
 
@@ -42,9 +41,11 @@ public class ChatService {
 
         publisher.sendMessage(channelTopic, form);
 
-        memberChatRooms.forEach(memberChatRoom ->
+        memberChatRooms.stream()
+                .filter(memberChatRoom -> !Objects.equals(memberChatRoom.getMember().getNickname(),
+                        form.getSenderNickname()))
+                .forEach(memberChatRoom ->
                 pushService.makeAndSendPushNotification(
-                        PushCategory.CHAT_MESSAGE_NOTIFICATION, memberChatRoom.getMember().getAccount())
-        );
+                        PushCategory.CHAT_MESSAGE_NOTIFICATION, memberChatRoom.getMember().getAccount(), form));
     }
 }
