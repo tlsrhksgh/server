@@ -13,6 +13,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class FileService {
     private final FileApplication fileApplication;
     private final AwsS3Uploader s3Uploader;
@@ -21,9 +22,8 @@ public class FileService {
     @Value("${cloud.aws.s3.url}")
     private String imageUrl;
 
-    @Transactional
     public String memberImgFileUpload(MultipartFile file) {
-        if(Objects.isNull(file) || StringUtils.hasText(file.getName())) {
+        if(Objects.isNull(file) || !StringUtils.hasText(file.getOriginalFilename())) {
             return null;
         }
 
@@ -34,12 +34,11 @@ public class FileService {
         return imageUrl + translatedImgName;
     }
 
-    @Transactional
     public String updateMemberImgFile(MultipartFile file, Member member) {
         String currentImg = member.getImg();
         s3Uploader.delete(fileApplication.splitImageUrl(currentImg));
 
-        if(Objects.isNull(file)) {
+        if(Objects.isNull(file) || file.isEmpty()) {
             memberRepository.updateMemberImg(null, member.getAccount());
             return null;
         }
@@ -51,7 +50,6 @@ public class FileService {
         return translatedFileUrl;
     }
 
-    @Transactional
     public void deleteMemberImgFile(String imageUrl) {
         s3Uploader.delete(fileApplication.splitImageUrl(imageUrl));
     }

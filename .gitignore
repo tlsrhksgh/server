@@ -34,4 +34,4 @@ build/
 
 ##db
 application-db.yml
-application-apns.yml
+src/main/resources/application-apple.yml

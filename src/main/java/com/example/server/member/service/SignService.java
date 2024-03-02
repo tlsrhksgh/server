@@ -14,12 +14,14 @@ import com.example.server.security.JwtProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -63,6 +65,7 @@ public class SignService {
         resultMap.put("userInfo", userInfo);
         resultMap.put("accessToken", jwtProvider.createAccessToken(member.getAccount(), member.getRoles()));
         resultMap.put("refreshToken", jwtProvider.createRefreshToken(member.getAccount(), member.getRoles()));
+
         return CommonResponse.builder()
                 .resultCode(CodeConst.SUCCESS_CODE)
                 .resultMessage(CodeConst.SUCCESS_MESSAGE)

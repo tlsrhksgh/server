@@ -35,6 +35,7 @@ public class MemberService {
     private final FileService fileService;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional(readOnly = true)
     public CommonResponse getInfo(Authentication authentication) {
         Member member = customMemberRepository.findMemberByAccount(authentication.getName());
 
@@ -51,7 +52,6 @@ public class MemberService {
     }
 
     // 닉네임, 패스워드, 이미지 변경
-    @Transactional
     public CommonResponse updateMember(UpdateRequest request, Authentication authentication) {
         Member member = customMemberRepository.findMemberByAccount(authentication.getName());
 
@@ -110,7 +110,6 @@ public class MemberService {
                 .build();
     }
 
-    @Transactional
     public CommonResponse deleteMember(Authentication authentication) {
         Member member = customMemberRepository.findMemberByAccount(authentication.getName());
 

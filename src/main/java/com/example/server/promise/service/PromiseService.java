@@ -335,7 +335,8 @@ public class PromiseService {
         List members = mapper.convertValue(request.get("members"), List.class);
         try {
             for (Object info : members) {
-                String nickname = (String) info;
+                Map<String, String> memberMap = (Map<String, String>) info;
+                String nickname = memberMap.get("nickname");
                 if (promiseMemberRepository.countByPromiseIdAndNickname(mapper.convertValue(request.get("promiseId"), Long.class), nickname) > 0) {
                     // 이미 요청이 되었거나 멤버임
                     log.info("PromiseService - inviteFriend : FAIL");
