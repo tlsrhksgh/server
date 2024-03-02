@@ -29,6 +29,7 @@ public class CustomMemberRepository extends QuerydslRepositorySupport {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Transactional
     public Member findMemberByAccount(String account) {
         return queryFactory
                 .selectFrom(member)

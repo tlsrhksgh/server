@@ -6,7 +6,9 @@ import com.example.server.member.dto.OAuthLoginRequest;
 import com.example.server.member.service.CustomOAuth2UserService;
 import com.example.server.member.service.SignService;
 import com.example.server.member.dto.SignRequest;
+import com.example.server.member.service.dto.KakaoUserInfo;
 import com.example.server.security.JwtProvider;
+import com.nimbusds.jose.shaded.json.parser.ParseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +46,8 @@ public class SignController {
                     .resultMessage(CodeConst.REQUIRED_LOGIN_MESSAGE)
                     .build();
 
+
+
             return ResponseEntity.status(Integer.parseInt(commonResponse.getResultCode()))
                     .body(commonResponse);
         }
@@ -61,8 +65,11 @@ public class SignController {
     }
 
     @PostMapping("/login/oauth")
-    public ResponseEntity<CommonResponse> oauthLogin(@RequestBody OAuthLoginRequest request) {
-        return ResponseEntity.ok(customOAuth2UserService.login(request.getProvider(), request.getAccessToken()));
+    public ResponseEntity<CommonResponse> oauthLogin(@RequestBody OAuthLoginRequest request) throws ParseException {
+        Map<String, Object> attributes = customOAuth2UserService.login(request.getProvider(),request.getAccessToken());
+        CommonResponse response = customOAuth2UserService.getUserInfoAndSave((String) attributes.get("access_token"));
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/register")

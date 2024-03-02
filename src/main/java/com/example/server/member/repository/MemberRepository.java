@@ -6,12 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Transactional
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    Optional<Member> findByAccount(String account);
-
     boolean existsByAccount(String account);
 
     boolean existsByNickname(String nickname);
